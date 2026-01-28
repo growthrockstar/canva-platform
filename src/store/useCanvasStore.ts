@@ -58,6 +58,7 @@ export const useCanvasStore = create<CanvasStore>()(
             title: type === 'accordion' ? 'Nueva Hipótesis' : undefined,
             children: [],
             tableData: type === 'table' ? [['Métrica', 'Q1', 'Q2'], ['Retention', '20%', '25%']] : undefined,
+            graphConfig: type === 'graph_plot' ? undefined : undefined,
           };
 
           const updateWidgets = (widgets: Widget[]): Widget[] => {
@@ -85,68 +86,68 @@ export const useCanvasStore = create<CanvasStore>()(
 
       updateWidget: (sectionId, widgetId, data) =>
         set((state) => {
-            const updateRecursive = (widgets: Widget[]): Widget[] => {
-                return widgets.map(w => {
-                    if (w.id === widgetId) {
-                        return { ...w, ...data };
-                    }
-                    if (w.children) {
-                        return { ...w, children: updateRecursive(w.children) };
-                    }
-                    return w;
-                });
-            };
+          const updateRecursive = (widgets: Widget[]): Widget[] => {
+            return widgets.map(w => {
+              if (w.id === widgetId) {
+                return { ...w, ...data };
+              }
+              if (w.children) {
+                return { ...w, children: updateRecursive(w.children) };
+              }
+              return w;
+            });
+          };
 
-            return {
-                syllabus_sections: state.syllabus_sections.map(s => 
-                    s.id === sectionId ? { ...s, widgets: updateRecursive(s.widgets) } : s
-                ),
-                meta: { ...state.meta, last_modified: new Date().toISOString() },
-            }
+          return {
+            syllabus_sections: state.syllabus_sections.map(s =>
+              s.id === sectionId ? { ...s, widgets: updateRecursive(s.widgets) } : s
+            ),
+            meta: { ...state.meta, last_modified: new Date().toISOString() },
+          }
         }),
 
       removeWidget: (sectionId, widgetId) =>
         set((state) => {
-            const removeRecursive = (widgets: Widget[]): Widget[] => {
-                return widgets.filter(w => w.id !== widgetId).map(w => {
-                    if (w.children) {
-                        return { ...w, children: removeRecursive(w.children) };
-                    }
-                    return w;
-                });
-            };
+          const removeRecursive = (widgets: Widget[]): Widget[] => {
+            return widgets.filter(w => w.id !== widgetId).map(w => {
+              if (w.children) {
+                return { ...w, children: removeRecursive(w.children) };
+              }
+              return w;
+            });
+          };
 
-            return {
-                 syllabus_sections: state.syllabus_sections.map(s => 
-                    s.id === sectionId ? { ...s, widgets: removeRecursive(s.widgets) } : s
-                ),
-                meta: { ...state.meta, last_modified: new Date().toISOString() },
-            }
+          return {
+            syllabus_sections: state.syllabus_sections.map(s =>
+              s.id === sectionId ? { ...s, widgets: removeRecursive(s.widgets) } : s
+            ),
+            meta: { ...state.meta, last_modified: new Date().toISOString() },
+          }
         }),
-      
-      moveWidget: (sectionId, activeId, overId) => 
+
+      moveWidget: (sectionId, activeId, overId) =>
         set((state) => {
-            // Basic reordering implementation (flat list for now, nested reordering is complex)
-            // Ideally we use @dnd-kit's arrayMove
-             const section = state.syllabus_sections.find(s => s.id === sectionId);
-             if (!section) return state;
+          // Basic reordering implementation (flat list for now, nested reordering is complex)
+          // Ideally we use @dnd-kit's arrayMove
+          const section = state.syllabus_sections.find(s => s.id === sectionId);
+          if (!section) return state;
 
-             // Find indices
-             const oldIndex = section.widgets.findIndex(w => w.id === activeId);
-             const newIndex = section.widgets.findIndex(w => w.id === overId);
-             
-             if (oldIndex === -1 || newIndex === -1) return state;
+          // Find indices
+          const oldIndex = section.widgets.findIndex(w => w.id === activeId);
+          const newIndex = section.widgets.findIndex(w => w.id === overId);
 
-             const newWidgets = [...section.widgets];
-             const [movedItem] = newWidgets.splice(oldIndex, 1);
-             newWidgets.splice(newIndex, 0, movedItem);
+          if (oldIndex === -1 || newIndex === -1) return state;
 
-             return {
-                 syllabus_sections: state.syllabus_sections.map(s => 
-                     s.id === sectionId ? { ...s, widgets: newWidgets } : s
-                 ),
-                 meta: { ...state.meta, last_modified: new Date().toISOString() },
-             }
+          const newWidgets = [...section.widgets];
+          const [movedItem] = newWidgets.splice(oldIndex, 1);
+          newWidgets.splice(newIndex, 0, movedItem);
+
+          return {
+            syllabus_sections: state.syllabus_sections.map(s =>
+              s.id === sectionId ? { ...s, widgets: newWidgets } : s
+            ),
+            meta: { ...state.meta, last_modified: new Date().toISOString() },
+          }
         }),
 
       resetProject: () =>

@@ -1,4 +1,4 @@
-export type WidgetType = 'text_block' | 'accordion' | 'table' | 'image_base64';
+export type WidgetType = 'text_block' | 'accordion' | 'table' | 'image_base64' | 'graph_plot';
 
 export interface Widget {
   id: string;
@@ -8,6 +8,12 @@ export interface Widget {
   title?: string; // For accordion
   children?: Widget[]; // For accordion
   tableData?: string[][]; // For tables
+  graphConfig?: {
+    tableId: string;
+    chartType: 'bar' | 'line' | 'pie' | 'area';
+    xAxisColumn: number;
+    dataColumns: number[];
+  };
 }
 
 export interface SyllabusSection {
