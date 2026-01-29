@@ -27,6 +27,7 @@ export interface ProjectMeta {
   version: string;
   last_modified: string;
   theme: string;
+  grid_columns?: 1 | 2 | 3;
 }
 
 export interface ProjectInfo {

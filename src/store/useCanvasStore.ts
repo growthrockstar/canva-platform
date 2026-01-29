@@ -21,21 +21,33 @@ interface CanvasStore extends ProjectState {
   resetProject: () => void;
   loadProject: (state: ProjectState) => void;
   toggleSectionComplete: (sectionId: string) => void;
+  isExporting: boolean;
+  setIsExporting: (isExporting: boolean) => void;
+  setGridColumns: (columns: 1 | 2 | 3) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>()(
   persist(
     (set) => ({
+      isExporting: false,
+      setIsExporting: (isExporting) => set({ isExporting }),
+      
       meta: {
         version: '1.0',
         last_modified: new Date().toISOString(),
         theme: 'rockstar-default',
+        grid_columns: 1,
       },
       project: {
         title: 'Mi Estrategia de Crecimiento',
         student_name: 'Rockstar Student',
       },
       syllabus_sections: DEFAULT_SECTIONS,
+
+      setGridColumns: (columns) =>
+        set((state) => ({
+          meta: { ...state.meta, grid_columns: columns, last_modified: new Date().toISOString() },
+        })),
 
       setProjectTitle: (title) =>
         set((state) => ({
