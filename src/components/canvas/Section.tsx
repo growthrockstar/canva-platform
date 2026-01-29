@@ -57,11 +57,11 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
       {/* Section Header */}
       <div className="flex items-center justify-between mb-6 border-b border-[var(--color-primary)]/30 pb-2">
         <div className="flex flex-col">
-          {isExporting && (
+          {isGeneratingImage && (
             <img
               src="/LOGOGROWTH.png"
               alt="Growth Rockstar"
-              className="h-8 w-auto mb-2 opacity-80"
+              className="w-auto w-auto mb-2 opacity-80"
             />
           )}
           <h2 className="text-2xl font-bold text-[var(--color-primary)] flex items-center gap-3">

@@ -4,6 +4,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import type { Widget } from '../../../types/canvas';
 import { Button } from '../../ui/Button';
 import { sheetEngine, type FunctionMetadata } from '../../../lib/sheetEngine';
+import { useCanvasStore } from '../../../store/useCanvasStore';
 
 interface TableBlockProps {
   widget: Widget;
@@ -11,6 +12,7 @@ interface TableBlockProps {
 }
 
 export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
+  const { isExporting } = useCanvasStore();
   const rawData = widget.tableData || [['Header 1', 'Header 2'], ['Row 1', 'Row 2']];
   const [editingCell, setEditingCell] = useState<{ r: number, c: number } | null>(null);
   const [editingValue, setEditingValue] = useState('');
@@ -323,7 +325,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
   }
 
   return (
-    <div className="overflow-x-auto relative">
+    <div className={`relative ${isExporting ? 'overflow-visible w-max min-w-full' : 'overflow-x-auto'}`}>
       <table className="w-full border-collapse">
         <thead>
           <tr>
@@ -344,48 +346,53 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
               </td>
               {row.map((cell, colIndex) => (
                 <td key={colIndex} className="border border-white/10 p-0 relative group min-w-[100px]">
-                  <input
-                    ref={el => { inputRefs.current[`${rowIndex}-${colIndex}`] = el }}
-                    value={getCellDisplayValue(rowIndex, colIndex, cell)}
-                    onChange={(e) => handleChange(rowIndex, colIndex, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
-                    onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
-                    onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
-                    onBlur={() => {
-                      // Commit on blur
-                      if (editingCell?.r === rowIndex && editingCell?.c === colIndex) {
-                        commitEditing();
-                      }
-
-                      // Delay clearing editing cell to allow suggestion click to fire
-                      setTimeout(() => {
-                        // If we weren't just picking a suggestion (logic handled in click)
-                        // But here we need to be careful not to clear if we are just clicking another cell for range selection
-                        // Actually range selection keeps focus on original cell, so blur happens on original cell only if we click outside entirely 
-                        // or if we switch focus to another cell normally. 
-                        // If we click another cell in range mode, we preventDefault so blur shouldn't happen?
-                        // Wait, if I click another input, the current one blurs.
-                        // Range selection is tricky: if I mouseDown on another cell, browser attempts to focus it, firing blur on current.
-                        // preventDefault on mouseDown should stop focus change.
-
-                        // Let's rely on setEditingCell(null) only if we aren't in range select mode? 
-                        // Simplified: Just update `setEditingCell(null)` here unless we deal with specific retention cases.
-                        // The ranges selection logic is: click other cell -> preventDefault -> focus stays on current cell. 
-                        // So onBlur shouldn't fire for the current cell in that case.
-                        // We only setEditingCell(null) if focus actually leaves.
-                        if (!showSuggestions) {
-                          // We check relatedTarget? checking activeElement might be too late.
-                          // For now standard behavior.
-                          setEditingCell(null);
+                  {isExporting ? (
+                    <div className={`w-full h-full p-2 bg-transparent ${rowIndex === 0 ? 'font-bold text-[var(--color-primary)]' : 'text-white/80'}`}>
+                      {getCellDisplayValue(rowIndex, colIndex, cell)}
+                    </div>
+                  ) : (
+                    <input
+                      ref={el => { inputRefs.current[`${rowIndex}-${colIndex}`] = el }}
+                      value={getCellDisplayValue(rowIndex, colIndex, cell)}
+                      onChange={(e) => handleChange(rowIndex, colIndex, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
+                      onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
+                      onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
+                      onBlur={() => {
+                        // Commit on blur
+                        if (editingCell?.r === rowIndex && editingCell?.c === colIndex) {
+                          commitEditing();
                         }
-                      }, 150);
-                    }}
-                    className={`w-full h-full p-2 bg-transparent border-none focus:outline-none 
-                                    ${rowIndex === 0 ? 'font-bold text-[var(--color-primary)]' : 'text-white/80'}
-                                    focus:bg-white/10 transition-colors
-                               `}
-                  />
 
+                        // Delay clearing editing cell to allow suggestion click to fire
+                        setTimeout(() => {
+                          // If we weren't just picking a suggestion (logic handled in click)
+                          // But here we need to be careful not to clear if we are just clicking another cell for range selection
+                          // Actually range selection keeps focus on original cell, so blur happens on original cell only if we click outside entirely 
+                          // or if we switch focus to another cell normally. 
+                          // If we click another cell in range mode, we preventDefault so blur shouldn't happen?
+                          // Wait, if I click another input, the current one blurs.
+                          // Range selection is tricky: if I mouseDown on another cell, browser attempts to focus it, firing blur on current.
+                          // preventDefault on mouseDown should stop focus change.
+
+                          // Let's rely on setEditingCell(null) only if we aren't in range select mode? 
+                          // Simplified: Just update `setEditingCell(null)` here unless we deal with specific retention cases.
+                          // The ranges selection logic is: click other cell -> preventDefault -> focus stays on current cell. 
+                          // So onBlur shouldn't fire for the current cell in that case.
+                          // We only setEditingCell(null) if focus actually leaves.
+                          if (!showSuggestions) {
+                            // We check relatedTarget? checking activeElement might be too late.
+                            // For now standard behavior.
+                            setEditingCell(null);
+                          }
+                        }, 150);
+                      }}
+                      className={`w-full h-full p-2 bg-transparent border-none focus:outline-none 
+                                        ${rowIndex === 0 ? 'font-bold text-[var(--color-primary)]' : 'text-white/80'}
+                                        focus:bg-white/10 transition-colors
+                                `}
+                    />
+                  )}
                   {/* Suggestions Popover moved to Portal */}
 
                   {rowIndex === 0 && (
@@ -399,56 +406,64 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                   )}
                 </td>
               ))}
-              <td className="p-2 w-10 border-none">
-                <Button size="sm" variant="ghost" onClick={() => removeRow(rowIndex)} title="Borrar fila">
-                  <Trash2 className="w-4 h-4 text-red-500/50 hover:text-red-500" />
-                </Button>
-              </td>
+              {!isExporting && (
+                <td className="p-2 w-10 border-none">
+                  <Button size="sm" variant="ghost" onClick={() => removeRow(rowIndex)} title="Borrar fila">
+                    <Trash2 className="w-4 h-4 text-red-500/50 hover:text-red-500" />
+                  </Button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
 
-      {showSuggestions && popoverPosition && createPortal(
-        <div
-          ref={suggestionsRef}
-          className="fixed z-[9999] bg-gray-900 border border-white/20 rounded shadow-lg max-h-48 overflow-y-auto w-48 font-sans"
-          style={{
-            top: popoverPosition.top - window.scrollY, // Fixed position is relative to viewport, so we need calculated client coordinates
-            left: popoverPosition.left - window.scrollX
-          }}
-        >
-          {suggestions.map((s, i) => (
-            <div
-              key={s.name}
-              className={`px-3 py-2 cursor-pointer text-sm border-b border-white/5 last:border-0 ${i === selectedSuggestionIndex ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-white/10'}`}
-              onMouseDown={(e) => { e.preventDefault(); applySuggestion(s.name); }}
-            >
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="font-bold text-white">{s.name}</span>
-                <span className="text-xs text-white/50 font-mono">
-                  ({s.parameters.join(', ')})
-                </span>
-              </div>
-              {s.description && (
-                <div className="text-xs text-white/70 italic truncate">
-                  {s.description}
+      {
+        showSuggestions && popoverPosition && createPortal(
+          <div
+            ref={suggestionsRef}
+            className="fixed z-[9999] bg-gray-900 border border-white/20 rounded shadow-lg max-h-48 overflow-y-auto w-48 font-sans"
+            style={{
+              top: popoverPosition.top - window.scrollY, // Fixed position is relative to viewport, so we need calculated client coordinates
+              left: popoverPosition.left - window.scrollX
+            }}
+          >
+            {suggestions.map((s, i) => (
+              <div
+                key={s.name}
+                className={`px-3 py-2 cursor-pointer text-sm border-b border-white/5 last:border-0 ${i === selectedSuggestionIndex ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                onMouseDown={(e) => { e.preventDefault(); applySuggestion(s.name); }}
+              >
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="font-bold text-white">{s.name}</span>
+                  <span className="text-xs text-white/50 font-mono">
+                    ({s.parameters.join(', ')})
+                  </span>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>,
-        document.body
-      )}
+                {s.description && (
+                  <div className="text-xs text-white/70 italic truncate">
+                    {s.description}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>,
+          document.body
+        )
+      }
 
-      <div className="flex gap-2 mt-2">
-        <Button variant="secondary" size="sm" onClick={addRow}>
-          <Plus className="w-4 h-4 mr-2" /> Agregar Fila
-        </Button>
-        <Button variant="secondary" size="sm" onClick={addColumn}>
-          <Plus className="w-4 h-4 mr-2" /> Agregar Columna
-        </Button>
-      </div>
-    </div>
+      {
+        !isExporting && (
+          <div className="flex gap-2 mt-2">
+            <Button variant="secondary" size="sm" onClick={addRow}>
+              <Plus className="w-4 h-4 mr-2" /> Agregar Fila
+            </Button>
+            <Button variant="secondary" size="sm" onClick={addColumn}>
+              <Plus className="w-4 h-4 mr-2" /> Agregar Columna
+            </Button>
+          </div>
+        )
+      }
+    </div >
   );
 };
