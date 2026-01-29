@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useRef } from 'react';
-import type { Widget } from '../../../types/canvas';
-import { cn } from '../../../lib/utils';
+import type { Widget } from '@/types/canvas';
+import { cn } from '@/lib/utils';
 
 interface TextBlockProps {
   widget: Widget;

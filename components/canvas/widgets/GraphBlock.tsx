@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useState } from "react";
 import {
     BarChart,
@@ -17,10 +19,10 @@ import {
     Area,
 } from "recharts";
 import { Settings } from "lucide-react";
-import type { Widget } from "../../../types/canvas";
-import { useCanvasStore } from "../../../store/useCanvasStore";
-import { Button } from "../../ui/Button";
-import { sheetEngine } from "../../../lib/sheetEngine";
+import type { Widget } from '@/types/canvas';
+import { useCanvasStore } from '@/lib/store/useCanvasStore';
+import { Button } from '@/components/ui/Button';
+import { sheetEngine } from '@/lib/sheetEngine';
 
 interface GraphBlockProps {
     widget: Widget;

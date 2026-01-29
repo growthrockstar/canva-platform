@@ -1,7 +1,9 @@
+"use client";
+
 import React from 'react';
 import { Trash2 } from 'lucide-react';
-import type { Widget } from '../../types/canvas';
-import { useCanvasStore } from '../../store/useCanvasStore';
+import type { Widget } from '@/types/canvas';
+import { useCanvasStore } from '@/lib/store/useCanvasStore';
 import { TextBlock } from './widgets/TextBlock';
 import { ImageBlock } from './widgets/ImageBlock';
 import { TableBlock } from './widgets/TableBlock';

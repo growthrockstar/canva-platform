@@ -1,10 +1,12 @@
+"use client";
+
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Plus, Trash2 } from 'lucide-react';
-import type { Widget } from '../../../types/canvas';
-import { Button } from '../../ui/Button';
-import { sheetEngine, type FunctionMetadata } from '../../../lib/sheetEngine';
-import { useCanvasStore } from '../../../store/useCanvasStore';
+import type { Widget } from '@/types/canvas';
+import { Button } from '@/components/ui/Button';
+import { sheetEngine, type FunctionMetadata } from '@/lib/sheetEngine';
+import { useCanvasStore } from '@/lib/store/useCanvasStore';
 
 interface TableBlockProps {
   widget: Widget;

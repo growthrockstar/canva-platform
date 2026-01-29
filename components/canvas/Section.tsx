@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
 import {
@@ -5,13 +7,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Plus, CheckSquare, Square, Share2, Loader2 } from "lucide-react";
-import type { SyllabusSection } from "../../types/canvas";
-import { useCanvasStore } from "../../store/useCanvasStore";
+import type { SyllabusSection } from "@/types/canvas";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { Button } from "../ui/Button";
 import { WidgetRenderer } from "./WidgetRenderer";
 import { SortableWidget } from "./SortableWidget";
-import { cn } from "../../lib/utils";
-import { generateSectionImage } from "../../lib/exportUtils";
+import { cn } from "@/lib/utils";
+import { generateSectionImage } from "@/lib/exportUtils";
 
 interface SectionProps {
   section: SyllabusSection;

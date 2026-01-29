@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useRef } from 'react';
 import { X, Image as ImageIcon } from 'lucide-react';
-import type { Widget } from '../../../types/canvas';
-import { Button } from '../../ui/Button';
+import type { Widget } from '@/types/canvas';
+import { Button } from '@/components/ui/Button';
 
 interface ImageBlockProps {
   widget: Widget;
