@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Plus, Trash2 } from 'lucide-react';
 import type { Widget } from '../../../types/canvas';
 import { Button } from '../../ui/Button';
-import { sheetEngine } from '../../../lib/sheetEngine';
+import { sheetEngine, type FunctionMetadata } from '../../../lib/sheetEngine';
 
 interface TableBlockProps {
   widget: Widget;
@@ -13,10 +13,18 @@ interface TableBlockProps {
 export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
   const rawData = widget.tableData || [['Header 1', 'Header 2'], ['Row 1', 'Row 2']];
   const [editingCell, setEditingCell] = useState<{ r: number, c: number } | null>(null);
+  const [editingValue, setEditingValue] = useState('');
+
+  // Range Selection State
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectionStart, setSelectionStart] = useState<{ r: number, c: number } | null>(null);
+  // We need to track where in the text string the reference started to replace it correctly
+  const selectionRefIndex = useRef<number | null>(null);
 
   // Formula Hints state
-  const [functions, setFunctions] = useState<string[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  // const [functions, setFunctions] = useState<string[]>([]); // Removed, using metadata now
+  const [functionMeta, setFunctionMeta] = useState<FunctionMetadata[]>([]);
+  const [suggestions, setSuggestions] = useState<FunctionMetadata[]>([]);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filterText, setFilterText] = useState('');
@@ -33,7 +41,8 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
 
   // Load functions on mount
   useEffect(() => {
-    setFunctions(sheetEngine.getRegisteredFunctions());
+    // setFunctions(sheetEngine.getRegisteredFunctions());
+    setFunctionMeta(sheetEngine.getFunctionsWithMetadata());
   }, []);
 
   // Auto-scroll to selected suggestion
@@ -62,35 +71,140 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
     if (inputRefs.current[key]) {
       inputRefs.current[key]?.focus();
       setEditingCell({ r, c });
+      setEditingValue(rawData[r][c]); // Initialize local state
       setShowSuggestions(false);
     }
   }
 
+
+
+
+  const coordsToAddress = (r: number, c: number) => {
+    const colChar = String.fromCharCode(65 + c);
+    const rowNum = r + 1;
+    return `${colChar}${rowNum}`;
+  };
+
+  const getRangeString = (start: { r: number, c: number }, end: { r: number, c: number }) => {
+    const startAddr = coordsToAddress(start.r, start.c);
+    if (start.r === end.r && start.c === end.c) return startAddr;
+    const endAddr = coordsToAddress(end.r, end.c);
+    // Sort logic handled by Excel/Sheets usually, but let's just put start:end
+    // Actually, normally ranges are TopLeft:BottomRight.
+    // Let's ensure proper ordering if we want strict rects, but simple start:end works for most engines or we can sort.
+    // Let's just do Start:End and if engine complains we fix. HyperFormula handles A10:A1 fine.
+    return `${startAddr}:${endAddr}`;
+  };
+
+
   // Handle click to select range (if editing another cell with formula)
-  const handleCellClick = (e: React.MouseEvent, r: number, c: number) => {
+  const handleMouseDown = (e: React.MouseEvent, r: number, c: number) => {
     if (editingCell && (editingCell.r !== r || editingCell.c !== c)) {
       const currentVal = rawData[editingCell.r][editingCell.c];
+
+      // If we are editing a formula
       if (currentVal.startsWith('=')) {
-        e.preventDefault();
-        // Calculate cell address (e.g., A1, B2)
-        const colChar = String.fromCharCode(65 + c);
-        const rowNum = r + 1;
-        const address = `${colChar}${rowNum}`;
+        e.preventDefault(); // Prevent focus loss on editing cell
 
+        // Start selection
+        setIsDragging(true);
+        setSelectionStart({ r, c });
+
+        // If we were already selecting a range (dragging), we might want to restart?
+        // Simpler: Just append new reference.
+
+        const address = coordsToAddress(r, c);
         const newVal = currentVal + address;
-        updateCell(editingCell.r, editingCell.c, newVal);
+        selectionRefIndex.current = currentVal.length; // Mark where this reference starts
 
-        // Keep focus on the editing cell
+        // Update local state instead of onUpdate
+        setEditingValue(newVal);
+        // We essentially need to "persist" this local change to the 'currentVal' logic used by subsequent drags?
+        // Actually, subsequent drags use rawData to find start.
+        // BUT rawData is not updated yet!
+        // This is tricky. Range drag needs to know the *current prospective value* if we dragged before?
+        // No, range drag usually REPLACES the last inserted range.
+        // My previous logic in handleMouseEnter: `const currentVal = rawData...` uses stale data if we don't commit.
+
+        // Fix: `selectionRefIndex` allows us to construct new value from Original Base + New Range.
+        // So we just need to keep `editingValue` updated.
+
+        // updateCell(editingCell.r, editingCell.c, newVal); // Don't commit yet
+
+        // Keep focus
         const key = `${editingCell.r}-${editingCell.c}`;
+        // We need to maintain cursor position at end?
+        // Input is controlled, so updating value moves cursor to end usually.
         setTimeout(() => inputRefs.current[key]?.focus(), 0);
         return;
       }
     }
-    // Normal behavior
-    setEditingCell({ r, c });
+    // Normal click behavior (start editing this cell)
+    if (!editingCell) {
+      setEditingCell({ r, c });
+    }
   };
 
+  const handleMouseEnter = (r: number, c: number) => {
+    if (isDragging && selectionStart && editingCell) {
+      // We need the base value from before the *current* range selection started.
+      // The rawData has the committed value (without ANY range if we started fresh, OR with previous chars).
+      // Actually, we shouldn't use rawData[editingCell.r][editingCell.c] if we already appended something in handleMouseDown?
+      // Wait, in handleMouseDown I did NOT commit to rawData. So rawData is clean (pre-selection).
+      // Perfect.
+      const baseVal = rawData[editingCell.r][editingCell.c];
+
+      // Calculate new range string
+      const newRange = getRangeString(selectionStart, { r, c });
+
+      // Replace the part of string from selectionRefIndex to end
+      if (selectionRefIndex.current !== null) {
+        // If we are in the middle of dragging, we construct from base.
+        // Note: handleMouseDown appended to `editingValue`. 
+        // But here we reconstruct from `baseVal` (which doesn't have the first click address yet! wait).
+        // handleMouseDown: `currentVal = rawData...`. Then `newVal = currentVal + address`.
+        // If we drag, we want `currentVal + newRange`.
+        // So yes, using rawData is correct as the "stable prefix source".
+
+        // Wait, if I typed `=SUM(` and then clicked. rawData is `=SUM(`.
+        // handleMouseDown sets `editingValue` to `=SUM(A1`. `selectionRefIndex` points to `A`.
+        // handleMouseEnter usage: `prefix = currentVal.substring(0, selectionRefIndex)`. `currentVal` is `=SUM(`.
+        // Yes.
+
+        const prefix = baseVal.substring(0, selectionRefIndex.current);
+        setEditingValue(prefix + newRange);
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      setSelectionStart(null);
+      selectionRefIndex.current = null;
+      // Focus back to input
+      if (editingCell) {
+        const key = `${editingCell.r}-${editingCell.c}`;
+        inputRefs.current[key]?.focus();
+      }
+    }
+  };
+
+  // Add global mouse up to stop dragging if released outside
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        handleMouseUp();
+      }
+    };
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+  }, [isDragging]);
+
   const handleKeyDown = (e: React.KeyboardEvent, r: number, c: number) => {
+    // Stop propagation to prevent dnd-kit or other listeners from intercepting keys (like . or Backspace)
+    e.stopPropagation();
+
     if (showSuggestions) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -100,7 +214,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
         setSelectedSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
       } else if (e.key === 'Enter' || e.key === 'Tab') {
         e.preventDefault();
-        applySuggestion(suggestions[selectedSuggestionIndex]);
+        applySuggestion(suggestions[selectedSuggestionIndex].name);
       } else if (e.key === 'Escape') {
         setShowSuggestions(false);
       }
@@ -119,19 +233,21 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
       focusCell(r - 1, c);
     } else if (e.key === 'Enter') {
       e.preventDefault();
+      commitEditing();
       focusCell(r + 1, c);
     }
-  };
+  }
+
 
   const handleChange = (r: number, c: number, value: string) => {
-    updateCell(r, c, value);
+    setEditingValue(value);
 
     // Basic hint logic: if starts with = and typing letters
     if (value.startsWith('=')) {
       const match = value.match(/([A-Z]+)$/i);
       if (match) {
         const text = match[1].toUpperCase();
-        const filtered = functions.filter(f => f.startsWith(text));
+        const filtered = functionMeta.filter(f => f.name.startsWith(text));
         if (filtered.length > 0) {
           setSuggestions(filtered);
           setFilterText(text);
@@ -147,12 +263,27 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
 
   const applySuggestion = (funcName: string) => {
     if (!editingCell) return;
-    const { r, c } = editingCell;
-    const currentVal = rawData[r][c];
+    // const { r, c } = editingCell;
+    // Use editingValue instead of rawData since we might have typed more
+    const currentVal = editingValue;
     const newVal = currentVal.substring(0, currentVal.length - filterText.length) + funcName + '(';
-    updateCell(r, c, newVal);
+    setEditingValue(newVal);
+    // Focus back ensures we keep editing
+    const key = `${editingCell.r}-${editingCell.c}`;
+    inputRefs.current[key]?.focus();
+
     setShowSuggestions(false);
   };
+
+  const commitEditing = () => {
+    if (editingCell) {
+      updateCell(editingCell.r, editingCell.c, editingValue);
+      // We do NOT plain clear editingCell here if we are just moving focus, 
+      // but typically commit implies we are done with THIS cell or moving to another.
+      // The movement logic (focusCell) sets new editingCell.
+      // So this just persists.
+    }
+  }
 
   const updateCell = (rowIndex: number, colIndex: number, value: string) => {
     const newData = [...rawData];
@@ -186,7 +317,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
 
   const getCellDisplayValue = (r: number, c: number, rawValue: string) => {
     if (editingCell?.r === r && editingCell?.c === c) {
-      return rawValue;
+      return editingValue;
     }
     return sheetEngine.getComputedValue(widget.id, r, c) || rawValue;
   }
@@ -218,8 +349,14 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                     value={getCellDisplayValue(rowIndex, colIndex, cell)}
                     onChange={(e) => handleChange(rowIndex, colIndex, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
-                    onMouseDown={(e) => handleCellClick(e, rowIndex, colIndex)}
+                    onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
+                    onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
                     onBlur={() => {
+                      // Commit on blur
+                      if (editingCell?.r === rowIndex && editingCell?.c === colIndex) {
+                        commitEditing();
+                      }
+
                       // Delay clearing editing cell to allow suggestion click to fire
                       setTimeout(() => {
                         // If we weren't just picking a suggestion (logic handled in click)
@@ -283,11 +420,21 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
         >
           {suggestions.map((s, i) => (
             <div
-              key={s}
-              className={`px-3 py-1 cursor-pointer text-sm ${i === selectedSuggestionIndex ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-white/10'}`}
-              onMouseDown={(e) => { e.preventDefault(); applySuggestion(s); }}
+              key={s.name}
+              className={`px-3 py-2 cursor-pointer text-sm border-b border-white/5 last:border-0 ${i === selectedSuggestionIndex ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+              onMouseDown={(e) => { e.preventDefault(); applySuggestion(s.name); }}
             >
-              {s}
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="font-bold text-white">{s.name}</span>
+                <span className="text-xs text-white/50 font-mono">
+                  ({s.parameters.join(', ')})
+                </span>
+              </div>
+              {s.description && (
+                <div className="text-xs text-white/70 italic truncate">
+                  {s.description}
+                </div>
+              )}
             </div>
           ))}
         </div>,

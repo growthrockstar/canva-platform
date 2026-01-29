@@ -54,7 +54,7 @@ export const useCanvasStore = create<CanvasStore>()(
           const newWidget: Widget = {
             id: uuidv4(),
             type,
-            content: type === 'text_block' ? '<h3>Nuevo Título</h3><p>Escribe aquí tus ideas...</p>' : undefined,
+            content: type === 'text_block' ? '<h3 class="text-xl font-medium mb-2 mt-1">Nuevo Título</h3><p>Escribe aquí tus ideas...</p>' : undefined,
             title: type === 'accordion' ? 'Nueva Hipótesis' : undefined,
             children: [],
             tableData: type === 'table' ? [['Métrica', 'Q1', 'Q2'], ['Retention', '20%', '25%']] : undefined,
