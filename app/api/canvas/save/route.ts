@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifySession } from '@/lib/auth-utils';
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { canvasId, data, iv, salt, userId } = body;
+        const { canvasId, data, iv, salt } = body;
 
-        // TODO: Add proper authentication check here when auth is implemented.
-        // For now we assume userId is passed from client (THIS IS INSECURE but matches current state).
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized: No userId provided' }, { status: 401 });
+        // Check Session
+        const session = await verifySession();
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        const userId = session.userId;
 
         if (!canvasId || !data || !iv || !salt) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

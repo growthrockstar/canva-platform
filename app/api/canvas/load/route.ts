@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifySession } from '@/lib/auth-utils';
 
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const canvasId = searchParams.get('id');
-        const userId = searchParams.get('userId'); // TODO: Replace with server-side session check
 
-        if (!userId) {
-            return NextResponse.json({ error: 'Unauthorized: No userId provided' }, { status: 401 });
+        // Check Session
+        const session = await verifySession();
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        const userId = session.userId;
 
         // specific canvas fetch
         if (canvasId) {

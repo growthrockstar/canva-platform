@@ -45,7 +45,7 @@ interface CanvasStore extends ProjectState {
   lastSyncedAt: string | null;
   syncError: string | null;
   saveCanvas: () => Promise<void>;
-  loadCanvas: (userId: string) => Promise<void>; // Requires userId to fetch
+  loadCanvas: () => Promise<void>;
   forcePush: () => Promise<void>; // Force push local state to server
 
   // Tour
@@ -87,14 +87,11 @@ export const useCanvasStore = create<CanvasStore>()(
             // Encrypt
             const encrypted = await encryptData(dataToEncrypt, password);
             const canvasId = state.project.id || 'default-canvas';
-            const userId = 'user-123'; // FIXME: Real userId
-
             const response = await fetch('/api/canvas/save', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 canvasId,
-                userId,
                 ...encrypted
               })
             });
@@ -109,13 +106,13 @@ export const useCanvasStore = create<CanvasStore>()(
         }, 1000);
       },
 
-      loadCanvas: async (userId: string) => {
+      loadCanvas: async () => {
         const state = get();
         if (!state.encryptionPassword) return;
 
         set({ isSyncing: true, syncError: null });
         try {
-          const response = await fetch(`/api/canvas/load?userId=${userId}`);
+          const response = await fetch(`/api/canvas/load`);
           if (!response.ok) {
             if (response.status === 404) {
               set({ isSyncing: false });

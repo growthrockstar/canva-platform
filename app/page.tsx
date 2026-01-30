@@ -1,18 +1,26 @@
 "use client";
-import dynamic from "next/dynamic";
-import { Canvas } from "@/components/Canvas";
-import { Dashboard } from "@/components/Dashboard";
-import { Header } from "@/components/Header";
 
-const Tour = dynamic(() => import("@/components/Tour"), { ssr: false });
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
 
 export default function Home() {
+  const router = useRouter();
+  const { encryptionPassword } = useCanvasStore();
+
+  useEffect(() => {
+    if (encryptionPassword) {
+      router.replace('/canvas');
+    } else {
+      router.replace('/login');
+    }
+  }, [encryptionPassword, router]);
+
   return (
-    <div className="flex min-h-screen flex-col bg-[#282117] text-[#E8DDCA]">
-      <Tour />
-      <Header />
-      <Dashboard />
-      <Canvas />
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="animate-pulse">
+        <img src="/LOGOGROWTH.png" alt="Loading..." className="h-12 opacity-50" />
+      </div>
     </div>
   );
 }
