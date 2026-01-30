@@ -53,8 +53,27 @@ export async function GET(req: Request) {
                 }
             });
         } catch (decryptionError) {
-            console.error("Decryption failed", decryptionError);
-            return NextResponse.json({ error: 'Failed to decrypt canvas data' }, { status: 500 });
+            console.error("Decryption or Parse failed", decryptionError);
+
+            // Fallback: Return a valid structure with empty sections so the user isn't locked out
+            // We preserve what we can (Title, ID, timestamps)
+            return NextResponse.json({
+                canvas: {
+                    ...canvas,
+                    data: {
+                        project: {
+                            title: canvas.title,
+                        },
+                        syllabus_sections: [],
+                        meta: {
+                            version: '1.0',
+                            last_modified: new Date().toISOString(),
+                            theme: 'rockstar-default',
+                            grid_columns: 1,
+                        }
+                    }
+                }
+            });
         }
 
     } catch (error) {
