@@ -31,6 +31,7 @@ export interface ProjectMeta {
 }
 
 export interface ProjectInfo {
+  id?: string;
   title: string;
   student_name: string;
 }
