@@ -29,7 +29,7 @@ export const downloadFile = (blob: Blob, filename: string) => {
   URL.revokeObjectURL(url);
 };
 
-export const generateSectionImage = async (sectionId: string, sectionTitle: string) => {
+export const generateSectionImage = async (sectionId: string, sectionTitle: string, customText?: string) => {
   const element = document.getElementById(sectionId);
   if (!element) return;
 
@@ -58,9 +58,19 @@ export const generateSectionImage = async (sectionId: string, sectionTitle: stri
       const filename = `GrowthRockstar_${sectionTitle.replace(/\s+/g, '_')}.png`;
       const file = new File([blob], filename, { type: 'image/png' });
 
-      const shared = await shareFile(file, `Growth Rockstar: ${sectionTitle}`, 'Aquí tienes mi avance del Canvas.');
+      const textToShare = customText || 'Aquí tienes mi avance del Canvas.';
+      const shared = await shareFile(file, `Growth Rockstar: ${sectionTitle}`, textToShare);
       if (!shared) {
         downloadFile(blob, filename);
+        // Maybe copy text to clipboard if share failed?
+        if (customText) {
+            try {
+                await navigator.clipboard.writeText(customText);
+                alert("Imagen descargada. Texto copiado al portapapeles (WhatsApp Web no soporta envío directo de imagen + texto desde web).");
+            } catch (e) {
+                // Ignore
+            }
+        }
       }
     }, 'image/png');
 

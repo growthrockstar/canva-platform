@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/auth-utils';
+import { decrypt } from '@/lib/encryption';
 
 export async function GET(req: Request) {
     try {
@@ -14,9 +15,10 @@ export async function GET(req: Request) {
         }
         const userId = session.userId;
 
-        // specific canvas fetch
+        let canvas;
+
         if (canvasId) {
-            const canvas = await prisma.canvas.findUnique({
+            canvas = await prisma.canvas.findUnique({
                 where: { id: canvasId },
             });
 
@@ -24,24 +26,40 @@ export async function GET(req: Request) {
                 return NextResponse.json({ error: 'Canvas not found' }, { status: 404 });
             }
 
-            // Simple authorization check
             if (canvas.userId !== userId) {
                 return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
             }
-
-            return NextResponse.json(canvas);
+        } else {
+            // Fetch latest
+            canvas = await prisma.canvas.findFirst({
+                where: { userId: userId },
+                orderBy: { updatedAt: 'desc' }
+            });
         }
 
-        // Fetch latest canvas for user
-        const latestCanvas = await prisma.canvas.findFirst({
-            where: { userId: userId },
-            orderBy: { updatedAt: 'desc' }
-        });
+        if (!canvas) {
+            return NextResponse.json({ canvas: null });
+        }
 
-        return NextResponse.json({ canvas: latestCanvas }); // Returns null if none found, which is fine
+        // Decrypt data
+        try {
+            const decryptedString = decrypt(canvas.data, canvas.iv, canvas.salt);
+            const jsonData = JSON.parse(decryptedString);
+
+            return NextResponse.json({
+                canvas: {
+                    ...canvas,
+                    data: jsonData // Return the actual JSON object
+                }
+            });
+        } catch (decryptionError) {
+            console.error("Decryption failed", decryptionError);
+            return NextResponse.json({ error: 'Failed to decrypt canvas data' }, { status: 500 });
+        }
 
     } catch (error) {
         console.error('Error loading canvas:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+

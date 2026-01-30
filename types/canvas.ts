@@ -28,6 +28,7 @@ export interface ProjectMeta {
   last_modified: string;
   theme: string;
   grid_columns?: 1 | 2 | 3;
+  dbId?: string; // Database ID for cloud sync
 }
 
 export interface ProjectInfo {

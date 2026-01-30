@@ -9,19 +9,33 @@ import { Header } from "@/components/Header";
 import Tour from "@/components/Tour";
 
 export default function CanvasPage() {
-    const { encryptionPassword } = useCanvasStore();
+    const { isAuthenticated, isAuthChecking, loadCanvas } = useCanvasStore();
     const router = useRouter();
 
-    // Basic Protection Check
     useEffect(() => {
-        // Middleware protects this route server-side.
-        // This check handles local state (e.g. if user cleared storage but has cookie).
-        if (!encryptionPassword) {
+        // Attempt to load canvas (which checks session) on mount
+        loadCanvas();
+    }, []);
+
+    useEffect(() => {
+        // If done checking and still not authenticated, redirect
+        if (!isAuthChecking && !isAuthenticated) {
             router.replace('/login');
         }
-    }, [encryptionPassword, router]);
+    }, [isAuthChecking, isAuthenticated, router]);
 
-    if (!encryptionPassword) return null; // Prevent flash
+    if (isAuthChecking) {
+        return (
+            <div className="min-h-screen bg-[#282117] flex items-center justify-center">
+                <div className="animate-pulse flex flex-col items-center gap-4">
+                    <img src="/LOGOGROWTH.png" alt="Loading..." className="h-12 opacity-50" />
+                    <span className="text-white/30 text-sm tracking-widest uppercase">Cargando Estrategia...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) return null; 
 
     return <>      <Tour />
         <Header />

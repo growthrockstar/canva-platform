@@ -50,8 +50,12 @@ const Tour: React.FC = () => {
       content: 'Este es el corazón del canvas. Agrega bloques de texto, tablas, gráficos, imágenes o secciones desplegables para documentar tus hipótesis y experimentos.',
     },
     {
+      target: '#tour-share-button',
+      content: '¡Nuevo! Comparte tu avance directamente por WhatsApp. Elige una sección, escribe un mensaje y envíala como imagen a tu equipo o mentor.',
+    },
+    {
       target: '#tour-actions',
-      content: 'Finalmente, guarda tu progreso descargando el archivo .gr, carga proyectos anteriores o exporta todo a un PDF profesional para presentar.',
+      content: 'También puedes limpiar el lienzo o exportar todo a un PDF profesional para presentar.',
     },
   ];
 

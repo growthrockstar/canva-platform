@@ -6,7 +6,7 @@ import { useCanvasStore } from '@/lib/store/useCanvasStore';
 
 export const AuthForms = ({ mode = 'login' }: { mode?: 'login' | 'register' }) => {
     const router = useRouter();
-    const { setEncryptionPassword, loadCanvas } = useCanvasStore();
+    const { loadCanvas } = useCanvasStore();
 
     const [isLogin, setIsLogin] = useState(mode === 'login');
     const [formData, setFormData] = useState({
@@ -38,10 +38,7 @@ export const AuthForms = ({ mode = 'login' }: { mode?: 'login' | 'register' }) =
             }
 
             // SUCCESS
-            // 1. Set Encryption Password (for local decryption)
-            setEncryptionPassword(formData.password);
-
-            // 2. Load User Data
+            // 2. Load User Data (This will set isAuthenticated=true on success)
             await loadCanvas();
 
             // 3. Redirect to Canvas

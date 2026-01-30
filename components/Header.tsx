@@ -11,11 +11,13 @@ import {
   Columns,
   Rows,
   CircleHelp,
+  Share2,
 } from "lucide-react";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { Button } from "@/components/ui/Button";
 import { generateFullPDF } from "@/lib/exportUtils";
 import { cn } from "@/lib/utils";
+import { ShareModal } from "@/components/ShareModal";
 
 export const Header: React.FC = () => {
   const {
@@ -31,6 +33,7 @@ export const Header: React.FC = () => {
   } = useCanvasStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const handleDownload = () => {
     const state = useCanvasStore.getState();
@@ -75,7 +78,10 @@ export const Header: React.FC = () => {
   // Close dropdown when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsQualityOpen(false);
       }
     };
@@ -117,7 +123,10 @@ export const Header: React.FC = () => {
 
       <div className="flex items-center gap-2 lg:gap-4 flex-wrap justify-end">
         {/* View Options */}
-        <div id="tour-grid-view" className="flex items-center bg-white/5 rounded-md p-1 border border-white/10">
+        <div
+          id="tour-grid-view"
+          className="flex items-center bg-white/5 rounded-md p-1 border border-white/10"
+        >
           <button
             onClick={() => setGridColumns(1)}
             className={cn(
@@ -188,6 +197,7 @@ export const Header: React.FC = () => {
             <span className="hidden md:inline">Reset</span>
           </Button>
 
+          {/* 
           <Button
             variant="secondary"
             size="sm"
@@ -206,7 +216,8 @@ export const Header: React.FC = () => {
           >
             <Upload className="w-4 h-4 md:mr-2" />
             <span className="hidden md:inline">Cargar</span>
-          </Button>
+          </Button> 
+          */}
           <input
             type="file"
             ref={fileInputRef}
@@ -257,9 +268,13 @@ export const Header: React.FC = () => {
               </div>
             )}
           </div>
-
         </div>
       </div>
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+      />
     </header>
   );
 };
