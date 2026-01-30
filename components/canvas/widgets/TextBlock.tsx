@@ -13,6 +13,13 @@ interface TextBlockProps {
 export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // Initial render
+  React.useEffect(() => {
+    if (contentRef.current && !contentRef.current.innerHTML) {
+      contentRef.current.innerHTML = widget.content || "";
+    }
+  }, []);
+
   const handleBlur = () => {
     if (contentRef.current) {
       const rawHtml = contentRef.current.innerHTML;
@@ -240,6 +247,16 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
     return newHtml || html;
   };
 
+  // Sync content from prop if it changes and we are NOT focused
+  // This allows the local DOM to diverge (Markdown mode) during editing without React interfering.
+  React.useEffect(() => {
+    if (contentRef.current && document.activeElement !== contentRef.current) {
+      if (contentRef.current.innerHTML !== widget.content) {
+        contentRef.current.innerHTML = widget.content || "";
+      }
+    }
+  }, [widget.content]);
+
   return (
     <div className="group relative">
       <div
@@ -253,7 +270,6 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
         suppressContentEditableWarning
         onBlur={handleBlur}
         onFocus={handleFocus}
-        dangerouslySetInnerHTML={{ __html: widget.content || "" }}
         data-placeholder="Escribe aquí tus ideas..."
       />
     </div>

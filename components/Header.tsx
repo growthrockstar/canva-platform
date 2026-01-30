@@ -68,12 +68,30 @@ export const Header: React.FC = () => {
     event.target.value = "";
   };
 
-  const handlePDFExport = async () => {
+  // State for PDF Quality Dropdown
+  const [isQualityOpen, setIsQualityOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsQualityOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handlePDFExport = async (scale: number) => {
     setIsGeneratingPDF(true);
     setIsExporting(true);
+    setIsQualityOpen(false); // Close dropdown
     // Wait for render
     setTimeout(async () => {
-      await generateFullPDF(project.title);
+      await generateFullPDF(project.title, scale);
       setIsExporting(false);
       setIsGeneratingPDF(false);
     }, 1000);
@@ -197,20 +215,49 @@ export const Header: React.FC = () => {
             onChange={handleUpload}
           />
 
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handlePDFExport}
-            title="Exportar PDF"
-            disabled={isGeneratingPDF}
-          >
-            {isGeneratingPDF ? (
-              <Loader2 className="w-4 h-4 md:mr-2 animate-spin" />
-            ) : (
-              <FileJson className="w-4 h-4 md:mr-2" />
+          <div className="relative" ref={dropdownRef}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsQualityOpen(!isQualityOpen)}
+              title="Exportar PDF"
+              disabled={isGeneratingPDF}
+            >
+              {isGeneratingPDF ? (
+                <Loader2 className="w-4 h-4 md:mr-2 animate-spin" />
+              ) : (
+                <FileJson className="w-4 h-4 md:mr-2" />
+              )}
+              <span className="hidden md:inline">PDF</span>
+            </Button>
+
+            {isQualityOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-[#1E1E20] border border-white/10 rounded-md shadow-xl overflow-hidden z-[100]">
+                <div className="px-3 py-2 text-xs text-white/50 uppercase tracking-widest border-b border-white/5">
+                  Calidad de Exportación
+                </div>
+                <button
+                  onClick={() => handlePDFExport(1)}
+                  className="w-full text-left px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                >
+                  Baja (Rápida)
+                </button>
+                <button
+                  onClick={() => handlePDFExport(2)}
+                  className="w-full text-left px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                >
+                  Normal (Estándar)
+                </button>
+                <button
+                  onClick={() => handlePDFExport(3)}
+                  className="w-full text-left px-4 py-2 text-sm font-medium text-[var(--color-primary)] hover:bg-white/5 hover:text-white transition-colors"
+                >
+                  Alta (HD)
+                </button>
+              </div>
             )}
-            <span className="hidden md:inline">PDF</span>
-          </Button>
+          </div>
+
         </div>
       </div>
     </header>

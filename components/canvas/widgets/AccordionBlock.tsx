@@ -33,13 +33,12 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
         shouldShow
           ? "border-[var(--color-primary)] bg-black/20"
           : "border-white/20 hover:border-white/40",
-        isExporting && "border-none bg-transparent pl-0",
+        isExporting && "overflow-visible" // Prevent clipping during export
       )}
     >
       <div
         className={cn(
           "flex items-center p-3 bg-white/5 cursor-pointer select-none print:hidden",
-          isExporting && "hidden",
         )}
         onClick={toggleOpen}
       >
@@ -50,18 +49,24 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
             <ChevronRight className="w-5 h-5" />
           )}
         </span>
-        <input
-          value={widget.title || "Título Deslizable"}
-          onChange={(e) => onUpdate({ title: e.target.value })}
-          onClick={(e) => e.stopPropagation()}
-          className="bg-transparent border-none focus:outline-none font-bold uppercase tracking-wide flex-1 text-[var(--color-text)]"
-        />
+
+        {isExporting ? (
+          <span className="font-bold uppercase tracking-wide flex-1 text-[var(--color-text)]">
+            {widget.title || "Título Deslizable"}
+          </span>
+        ) : (
+          <input
+            value={widget.title || "Título Deslizable"}
+            onChange={(e) => onUpdate({ title: e.target.value })}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-transparent border-none focus:outline-none font-bold uppercase tracking-wide flex-1 text-[var(--color-text)]"
+          />
+        )}
       </div>
       {/* Print friendly title */}
       <div
         className={cn(
           "hidden font-bold uppercase tracking-wide text-[var(--color-primary)] mb-2 border-b border-gray-300 print:block",
-          isExporting && "block border-b border-white/20 pb-1",
         )}
       >
         {widget.title || "Título Deslizable"}
@@ -70,9 +75,9 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
       {(shouldShow || true) && (
         <div
           className={cn(
-            "p-4 border-t border-white/10 space-y-4 animate-in slide-in-from-top-2 duration-200 print:block print:border-none print:p-0",
+            "p-4 border-t border-white/10 space-y-4 duration-200 print:block print:border-none print:p-0",
+            !isExporting && "animate-in slide-in-from-top-2", // Disable animation during export
             shouldShow ? "block" : "hidden print:block",
-            isExporting && "border-none p-0",
           )}
         >
           {widget.children?.map((child) => (

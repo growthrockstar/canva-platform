@@ -92,7 +92,9 @@ export const useCanvasStore = create<CanvasStore>()(
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 canvasId,
-                ...encrypted
+                data: encrypted.ciphertext,
+                iv: encrypted.iv,
+                salt: encrypted.salt
               })
             });
 

@@ -69,7 +69,7 @@ export const generateSectionImage = async (sectionId: string, sectionTitle: stri
   }
 };
 
-export const generateFullPDF = async (projectTitle: string) => {
+export const generateFullPDF = async (projectTitle: string, scale: number = 3) => {
   // We target the main canvas container
   const element = document.getElementById('main-canvas-container');
   if (!element) {
@@ -81,7 +81,7 @@ export const generateFullPDF = async (projectTitle: string) => {
 
   try {
     const canvas = await html2canvas(element, {
-      scale: 3, // Increased scale for better quality
+      scale: scale, // Use provided scale
       backgroundColor: '#1E1E20', // Matches app background usually
       useCORS: true,
       logging: false,

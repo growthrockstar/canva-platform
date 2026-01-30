@@ -120,7 +120,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
           <div
             className={cn(
               "space-y-4 min-h-[100px] border border-dashed border-white/5 rounded-lg p-4 bg-white/[0.02]",
-              isExporting && "border-none p-0",
+
             )}
           >
             {section.widgets.length === 0 && !isExporting && (
