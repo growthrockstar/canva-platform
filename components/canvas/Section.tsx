@@ -242,6 +242,13 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
         >
           <Plus className="w-4 h-4 mr-2" /> Gráfico
         </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => addWidget(section.id, "link_block")}
+        >
+          <Plus className="w-4 h-4 mr-2" /> Enlace
+        </Button>
       </div>
     </div>
   );

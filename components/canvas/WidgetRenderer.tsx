@@ -8,7 +8,9 @@ import { TextBlock } from './widgets/TextBlock';
 import { ImageBlock } from './widgets/ImageBlock';
 import { TableBlock } from './widgets/TableBlock';
 import { GraphBlock } from './widgets/GraphBlock';
+
 import { AccordionBlock } from './widgets/AccordionBlock';
+import { LinkBlock } from './widgets/LinkBlock';
 import { Button } from '../ui/Button';
 
 interface WidgetRendererProps {
@@ -36,6 +38,8 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget, sectionI
         return <GraphBlock widget={widget} onUpdate={handleUpdate} />;
       case 'accordion':
         return <AccordionBlock widget={widget} sectionId={sectionId} onUpdate={handleUpdate} />;
+      case 'link_block':
+        return <LinkBlock widget={widget} onUpdate={handleUpdate} />;
       default:
         return null; // Fallback
     }

@@ -1,4 +1,4 @@
-export type WidgetType = 'text_block' | 'accordion' | 'table' | 'image_base64' | 'graph_plot';
+export type WidgetType = 'text_block' | 'accordion' | 'table' | 'image_base64' | 'graph_plot' | 'link_block';
 
 export interface Widget {
   id: string;
@@ -13,6 +13,12 @@ export interface Widget {
     chartType: 'bar' | 'line' | 'pie' | 'area';
     xAxisColumn: number;
     dataColumns: number[];
+  };
+  linkData?: {
+    url: string;
+    title?: string;
+    description?: string;
+    provider?: 'youtube' | 'file' | 'generic' | 'twitter' | 'github' | 'spotify' | 'image' | 'video' | 'figma' | 'loom' | 'vimeo' | 'codepen' | 'map' | 'instagram' | 'reddit';
   };
 }
 
