@@ -10,6 +10,7 @@ export const Canvas: React.FC = () => {
     syllabus_sections,
     isExporting,
     meta,
+    isAuthenticated,
     encryptionPassword,
     isSyncing,
     lastSyncedAt,

@@ -31,6 +31,8 @@ interface CanvasStore extends ProjectState {
   setGridColumns: (columns: 1 | 2 | 3) => void;
 
   // Sync & Security
+  encryptionPassword: string | null;
+  setEncryptionPassword: (password: string) => void;
   isAuthenticated: boolean;
   isAuthChecking: boolean;
   setIsAuthenticated: (auth: boolean) => void;
@@ -55,6 +57,8 @@ export const useCanvasStore = create<CanvasStore>()(
     setIsExporting: (isExporting) => set({ isExporting }),
 
     // Sync State
+
+    encryptionPassword: null,
     isAuthenticated: false,
     isAuthChecking: true, // Start assuming we need to check
     setIsAuthenticated: (auth) => set({ isAuthenticated: auth }),
@@ -62,9 +66,12 @@ export const useCanvasStore = create<CanvasStore>()(
     lastSyncedAt: null,
     syncError: null,
 
+    setEncryptionPassword: (password) => set({ encryptionPassword: password }),
+
+
     saveCanvas: async () => {
       const state = get();
-
+      
       // Debounced Save Logic
       clearTimeout(saveTimeout);
 
@@ -78,20 +85,13 @@ export const useCanvasStore = create<CanvasStore>()(
           };
 
           // Send plain data, server handles encryption
-          // Note: We don't have a persistent ID in project state yet? 
-          // We should probably store the DB ID in state.meta or state.project if we want to update the same record.
-          // For now, let's assume we want to CREATE or UPDATE based on some ID.
-          // But wait, the previous code used `state.project.id` which wasn't defined in types?
-          // Let's rely on the server creating one if missing, but we need to store it back!
-
           const response = await fetch('/api/canvas/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              canvasId,
-              data: encrypted.ciphertext,
-              iv: encrypted.iv,
-              salt: encrypted.salt
+              canvasId: (state.meta as any).dbId, 
+              title: state.project.title,
+              data: dataToSave
             })
           });
 
@@ -103,7 +103,7 @@ export const useCanvasStore = create<CanvasStore>()(
           if (!response.ok) throw new Error('Failed to save');
 
           const result = await response.json();
-
+          
           // Update state with the returned ID so future saves update this record
           if (result.canvas && result.canvas.id) {
             set((prev) => ({
