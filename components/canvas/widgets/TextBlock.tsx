@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useRef } from 'react';
-import type { Widget } from '@/types/canvas';
-import { cn } from '@/lib/utils';
+import React, { useRef } from "react";
+import type { Widget } from "@/types/canvas";
+import { cn } from "@/lib/utils";
 
 interface TextBlockProps {
   widget: Widget;
@@ -41,39 +41,39 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
   };
 
   const revertToMarkdown = (html: string): string => {
-    const tempDiv = document.createElement('div');
+    const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
 
     // Helper function to process inline elements
     const processInlineNode = (node: Node): string => {
       if (node.nodeType === Node.TEXT_NODE) {
-        return node.textContent || '';
+        return node.textContent || "";
       }
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as Element;
         const tagName = el.tagName.toLowerCase();
 
-        let content = Array.from(el.childNodes).map(processInlineNode).join('');
+        const content = Array.from(el.childNodes).map(processInlineNode).join("");
 
         switch (tagName) {
-          case 'b':
-          case 'strong':
+          case "b":
+          case "strong":
             return `**${content}**`;
-          case 'i':
-          case 'em':
+          case "i":
+          case "em":
             return `*${content}*`;
-          case 'u':
+          case "u":
             return `__${content}__`;
-          case 's':
-          case 'strike':
+          case "s":
+          case "strike":
             return `~~${content}~~`;
-          case 'br':
-            return '<br>'; // Preserve <br> for line breaks within a block
+          case "br":
+            return "<br>"; // Preserve <br> for line breaks within a block
           default:
             return content; // For other inline elements, just return their content
         }
       }
-      return '';
+      return "";
     };
 
     // Helper function to process block elements
@@ -83,86 +83,102 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
         if (node.textContent?.trim()) {
           return `<div>${node.textContent}</div>`;
         }
-        return '';
+        return "";
       }
       const el = node as Element;
       const tag = el.tagName.toLowerCase();
 
-      if (tag === 'ul' || tag === 'ol') {
-        return Array.from(el.children).map((li, i) => {
-          const prefix = tag === 'ul' ? '- ' : `${i + 1}. `;
-          const inner = Array.from(li.childNodes).map(processInlineNode).join(''); // Process li content as inline
-          return `<div>${prefix}${inner}</div>`;
-        }).join('');
+      if (tag === "ul" || tag === "ol") {
+        return Array.from(el.children)
+          .map((li, i) => {
+            const prefix = tag === "ul" ? "- " : `${i + 1}. `;
+            const inner = Array.from(li.childNodes)
+              .map(processInlineNode)
+              .join(""); // Process li content as inline
+            return `<div>${prefix}${inner}</div>`;
+          })
+          .join("");
       }
 
-      if (tag === 'h1') return `<div># ${Array.from(el.childNodes).map(processInlineNode).join('')}</div>`;
-      if (tag === 'h2') return `<div>## ${Array.from(el.childNodes).map(processInlineNode).join('')}</div>`;
-      if (tag === 'h3') return `<div>### ${Array.from(el.childNodes).map(processInlineNode).join('')}</div>`;
+      if (tag === "h1")
+        return `<div># ${Array.from(el.childNodes).map(processInlineNode).join("")}</div>`;
+      if (tag === "h2")
+        return `<div>## ${Array.from(el.childNodes).map(processInlineNode).join("")}</div>`;
+      if (tag === "h3")
+        return `<div>### ${Array.from(el.childNodes).map(processInlineNode).join("")}</div>`;
 
-      if (tag === 'div' || tag === 'p') {
-        const inner = Array.from(el.childNodes).map(processBlockNode).join(''); // Recursively process children as blocks
+      if (tag === "div" || tag === "p") {
+        const inner = Array.from(el.childNodes).map(processBlockNode).join(""); // Recursively process children as blocks
         return `<div>${inner}</div>`;
       }
 
       // For other block-level elements or unhandled elements, treat their content as a block
       // and process their children as inline, then wrap in a div.
-      const inlineContent = Array.from(el.childNodes).map(processInlineNode).join('');
+      const inlineContent = Array.from(el.childNodes)
+        .map(processInlineNode)
+        .join("");
       if (inlineContent.trim()) {
         return `<div>${inlineContent}</div>`;
       }
-      return '';
+      return "";
     };
 
     // Process all top-level nodes in the temporary div
-    return Array.from(tempDiv.childNodes).map(processBlockNode).join('');
+    return Array.from(tempDiv.childNodes).map(processBlockNode).join("");
   };
 
   const processPseudoMarkdown = (html: string): string => {
     // 1. Temporary container to parse HTML structure
-    const tempDiv = document.createElement('div');
+    const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
 
     const nodes = Array.from(tempDiv.childNodes);
-    let newHtml = '';
+    let newHtml = "";
     let listBuffer: string[] = [];
-    let listType: 'ul' | 'ol' | null = null;
+    let listType: "ul" | "ol" | null = null;
 
     const formatInline = (text: string): string => {
-      return text
-        // Bold: **text**
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        // Underline: __text__ (Requested by user)
-        .replace(/__(.*?)__/g, '<u>$1</u>')
-        // Italic: *text* (Negative lookbehind/ahead for * to avoid matching ** parts? 
-        // Simpler: process ** first, then *. But * matches within ** if greedy?
-        // The previous regex consumed **. So usually OK. 
-        // But `*` might match inside `<b>...</b>`? No, we replaced `*` with `<`.
-        .replace(/\*(.*?)\*/g, '<i>$1</i>')
-        // Strikethrough: ~~text~~
-        .replace(/~~(.*?)~~/g, '<s>$1</s>');
+      return (
+        text
+          // Bold: **text**
+          .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>")
+          // Underline: __text__ (Requested by user)
+          .replace(/__(.*?)__/g, "<u>$1</u>")
+          // Italic: *text* (Negative lookbehind/ahead for * to avoid matching ** parts?
+          // Simpler: process ** first, then *. But * matches within ** if greedy?
+          // The previous regex consumed **. So usually OK.
+          // But `*` might match inside `<b>...</b>`? No, we replaced `*` with `<`.
+          .replace(/\*(.*?)\*/g, "<i>$1</i>")
+          // Strikethrough: ~~text~~
+          .replace(/~~(.*?)~~/g, "<s>$1</s>")
+      );
     };
 
     const flushList = () => {
       if (listBuffer.length > 0 && listType) {
         const listTag = listType;
-        newHtml += `<${listTag} class="list-inside ${listTag === 'ul' ? 'list-disc' : 'list-decimal'} pl-4 mb-2">`;
-        newHtml += listBuffer.map(item => `<li>${formatInline(item)}</li>`).join('');
+        newHtml += `<${listTag} class="list-inside ${listTag === "ul" ? "list-disc" : "list-decimal"} pl-4 mb-2">`;
+        newHtml += listBuffer
+          .map((item) => `<li>${formatInline(item)}</li>`)
+          .join("");
         newHtml += `</${listTag}>`;
         listBuffer = [];
         listType = null;
       }
     };
 
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       // Check if node is element (div) or text
-      const textContent = node.textContent?.trim() || '';
+      const textContent = node.textContent?.trim() || "";
 
       // If empty, preserve <br> or similar if needed, or skip
       if (!textContent) {
-        if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName === 'BR') {
+        if (
+          node.nodeType === Node.ELEMENT_NODE &&
+          (node as Element).tagName === "BR"
+        ) {
           flushList();
-          newHtml += '<br>';
+          newHtml += "<br>";
         }
         return;
       }
@@ -174,8 +190,8 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
       const h3Match = textContent.match(/^###\s+(.*)/);
 
       let isListItem = false;
-      let currentType: 'ul' | 'ol' | null = null;
-      let content = '';
+      let currentType: "ul" | "ol" | null = null;
+      let content = "";
       let handled = false; // New flag to prevent double processing
 
       if (h1Match) {
@@ -192,15 +208,15 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
         handled = true;
       } else if (bulletMatch) {
         isListItem = true;
-        currentType = 'ul';
+        currentType = "ul";
         content = bulletMatch[1];
       } else if (numberMatch) {
         isListItem = true;
-        currentType = 'ol';
+        currentType = "ol";
         content = numberMatch[1];
       } else if (listType && textContent.match(/^\d+\.\s+(.*)/)) {
         isListItem = true;
-        currentType = 'ol';
+        currentType = "ol";
         content = textContent.match(/^\d+\.\s+(.*)/)![1];
       }
 
@@ -231,16 +247,15 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
         className={cn(
           "min-h-[2em] p-2 outline-none focus:ring-1 focus:ring-[var(--color-primary)] rounded border border-transparent hover:border-white/10 transition-colors text-lg",
           "empty:before:content-[attr(data-placeholder)] empty:before:text-white/30",
-          "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" // Add styles for lists
+          "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5", // Add styles for lists
         )}
         contentEditable
         suppressContentEditableWarning
         onBlur={handleBlur}
         onFocus={handleFocus}
-        dangerouslySetInnerHTML={{ __html: widget.content || '' }}
+        dangerouslySetInnerHTML={{ __html: widget.content || "" }}
         data-placeholder="Escribe aquí tus ideas..."
       />
     </div>
   );
 };
-

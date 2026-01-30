@@ -98,7 +98,7 @@ export const Canvas: React.FC = () => {
           alt="Growth Rockstar"
           className="h-16 mx-auto mb-4"
         />
-        <h1 className="text-3xl font-bold text-[var(--color-primary)]">
+        <h1 className="text-3xl font-title font-bold text-[var(--color-primary)]">
           GROWTH CANVAS
         </h1>
         <p className="text-sm text-[var(--color-text)] opacity-70 uppercase tracking-widest mt-2">

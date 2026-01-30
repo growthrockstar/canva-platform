@@ -3,7 +3,6 @@ import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import type { ProjectState, Widget, SyllabusSection, WidgetType } from '@/types/canvas';
 import { encryptData, decryptData } from '@/lib/crypto';
-import { v4 as uuidv4 } from 'uuid';
 
 // Debounce helper
 const debounce = (fn: Function, ms: number) => {
@@ -48,19 +47,20 @@ interface CanvasStore extends ProjectState {
   saveCanvas: () => Promise<void>;
   loadCanvas: (userId: string) => Promise<void>; // Requires userId to fetch
   forcePush: () => Promise<void>; // Force push local state to server
+
+  // Tour
+  runTour: boolean;
+  setRunTour: (run: boolean) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       isExporting: false,
       setIsExporting: (isExporting) => set({ isExporting }),
 
       // Sync State
-      encryptionPassword: null, // Don't persist this by default for higher security? Or maybe we should?
-      // If using 'persist' middleware, it WILL be persisted if part of state.
-      // For now, let's persist it for UX (Cold Start). 
-      // Ideally, we'd use session storage or ask on load.
+      encryptionPassword: null,
       isSyncing: false,
       lastSyncedAt: null,
       syncError: null,
@@ -69,48 +69,44 @@ export const useCanvasStore = create<CanvasStore>()(
 
       saveCanvas: async () => {
         const state = get();
-        if (!state.encryptionPassword) return; // Cannot save without password
+        const password = state.encryptionPassword;
+        if (!password) return; // Cannot save without password
 
-        // Debounced Save Logic could be handled here or by caller. 
-        // For "auto saving al terminar de editar", we might want immediate or short debounce.
+        // Debounced Save Logic
+        clearTimeout(saveTimeout);
 
-        set({ isSyncing: true, syncError: null });
+        saveTimeout = setTimeout(async () => {
+          set({ isSyncing: true, syncError: null });
+          try {
+            const dataToEncrypt = {
+              project: state.project,
+              syllabus_sections: state.syllabus_sections,
+              meta: state.meta
+            };
 
-        try {
-          const dataToEncrypt = {
-            project: state.project,
-            syllabus_sections: state.syllabus_sections,
-            meta: state.meta
-          };
+            // Encrypt
+            const encrypted = await encryptData(dataToEncrypt, password);
+            const canvasId = state.project.id || 'default-canvas';
+            const userId = 'user-123'; // FIXME: Real userId
 
-          // Encrypt
-          const encrypted = await encryptData(dataToEncrypt, state.encryptionPassword);
-          const canvasId = state.project.id || 'default-canvas'; // TODO: Manage IDs properly
+            const response = await fetch('/api/canvas/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                canvasId,
+                userId,
+                ...encrypted
+              })
+            });
 
-          // Save to API
-          // We need userId here. Ideally stored in user session or passed in. 
-          // For this 'local-first' attempt, we might need a userId in the store or passed from a component.
-          // Let's assume there's a user context we can grab, OR we store userId in the store too.
-          // For now, let's mock userId or fail if missing.
-          const userId = 'user-123'; // FIXME: Get real userId
+            if (!response.ok) throw new Error('Failed to save');
 
-          const response = await fetch('/api/canvas/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              canvasId,
-              userId, // Sending userId is insecure if not verified by session, but matches current plan
-              ...encrypted
-            })
-          });
-
-          if (!response.ok) throw new Error('Failed to save');
-
-          set({ isSyncing: false, lastSyncedAt: new Date().toISOString() });
-        } catch (error) {
-          console.error("Sync error:", error);
-          set({ isSyncing: false, syncError: 'Failed to save to cloud.' });
-        }
+            set({ isSyncing: false, lastSyncedAt: new Date().toISOString() });
+          } catch (error) {
+            console.error("Sync error:", error);
+            set({ isSyncing: false, syncError: 'Failed to save to cloud.' });
+          }
+        }, 1000);
       },
 
       loadCanvas: async (userId: string) => {
@@ -122,7 +118,6 @@ export const useCanvasStore = create<CanvasStore>()(
           const response = await fetch(`/api/canvas/load?userId=${userId}`);
           if (!response.ok) {
             if (response.status === 404) {
-              // No remote data, that's fine, keep local
               set({ isSyncing: false });
               return;
             }
@@ -135,15 +130,11 @@ export const useCanvasStore = create<CanvasStore>()(
             return;
           }
 
-          // Decrypt
-          // Check if remote is newer? 
-          // For cold start, we usually want remote if local is stale or empty.
-          // Let's just decrypt and load for now.
           const decryptedState = await decryptData(data.canvas.data, data.canvas.iv, data.canvas.salt, state.encryptionPassword);
 
           set({
             project: decryptedState.project,
-            syllabus_sections: decryptedState.syllabus_sections, // Merge? No, overwrite for now.
+            syllabus_sections: decryptedState.syllabus_sections,
             meta: decryptedState.meta,
             isSyncing: false,
             lastSyncedAt: data.canvas.updatedAt
@@ -158,6 +149,10 @@ export const useCanvasStore = create<CanvasStore>()(
       forcePush: async () => {
         await get().saveCanvas();
       },
+
+      // Tour State
+      runTour: true,
+      setRunTour: (run) => set({ runTour: run }),
 
       meta: {
         version: '1.0',
