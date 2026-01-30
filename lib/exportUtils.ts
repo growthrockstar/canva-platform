@@ -81,40 +81,36 @@ export const generateFullPDF = async (projectTitle: string) => {
 
   try {
     const canvas = await html2canvas(element, {
-      scale: 2,
-      backgroundColor: '#282117',
+      scale: 3, // Increased scale for better quality
+      backgroundColor: '#1E1E20', // Matches app background usually
       useCORS: true,
       logging: false,
+      width: element.scrollWidth,
+      height: element.scrollHeight,
       windowWidth: element.scrollWidth,
       windowHeight: element.scrollHeight
     });
 
     const imgData = canvas.toDataURL('image/png');
 
-    // A4 dimensions in mm
+    // Calculate dimensions
+    // User wants ONE page with custom height.
+    // Let's base width on a standard A4 width (210mm) to keep text legible physically if needed, 
+    // or just proportional. 
+    // Actually, usually users want digital PDF.
+
+    // Let's use 210mm width as standard.
+    const pdfWidth = 210;
+    const imgProps = { width: canvas.width, height: canvas.height };
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
     const pdf = new jsPDF({
       orientation: 'p',
       unit: 'mm',
-      format: 'a4',
+      format: [pdfWidth, pdfHeight], // Custom single page size
     });
 
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    let heightLeft = pdfHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft >= 0) {
-      position = heightLeft - pdfHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-    }
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
     const filename = `GrowthRockstar_${projectTitle.replace(/\s+/g, '_')}.pdf`;
 
