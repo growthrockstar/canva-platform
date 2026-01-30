@@ -78,7 +78,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[var(--color-background)]/95 backdrop-blur px-6 py-4 flex items-center justify-between print:hidden gap-4">
+    <header className="sticky top-0 z-50 w-full border-b font-sans border-white/10 bg-[var(--color-background)]/95 backdrop-blur px-6 py-4 flex items-center justify-between print:hidden gap-4">
       <div className="flex flex-col min-w-[200px]">
         <div className="flex items-center gap-2">
           <span className="text-[var(--color-primary)] font-bold text-xl tracking-tighter">

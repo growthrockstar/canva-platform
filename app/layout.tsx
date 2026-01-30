@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Inter, Oswald } from "next/font/google";
+
 import "./globals.css";
 
+import { Inter } from "next/font/google";
+import { Oswald } from "next/font/google";
+
 const inter = Inter({
-  variable: "--font-inter",
+  variable: "--font-inter-v",
   subsets: ["latin"],
 });
 
 const oswald = Oswald({
-  variable: "--font-oswald",
+  variable: "--font-oswald-v",
   subsets: ["latin"],
 });
 
@@ -24,9 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} ${oswald.variable} `}>
-        {children}
-      </body>
+      <body className={`${oswald.variable} ${inter.variable}`}>{children}</body>
     </html>
   );
 }

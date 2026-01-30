@@ -58,7 +58,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
     >
       {/* Section Header */}
       <div className="flex items-center justify-between mb-6 border-b border-[var(--color-primary)]/30 pb-2">
-        <div className="flex flex-col">
+        <div className="flex flex-col font-title">
           {isGeneratingImage && (
             <img
               src="/LOGOGROWTH.png"
@@ -66,7 +66,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
               className="w-auto w-auto mb-2 opacity-80"
             />
           )}
-          <h2 className="text-2xl font-bold text-[var(--color-primary)] flex items-center gap-3">
+          <h2 className="text-2xl font-bold  text-[var(--color-primary)] flex items-center gap-3">
             <span
               className={cn(
                 "text-white/20 text-3xl print:text-black/50",
@@ -121,7 +121,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
         >
           <div
             className={cn(
-              "space-y-4 min-h-[100px] border border-dashed border-white/5 rounded-lg p-4 bg-white/[0.02]",
+              "space-y-4 min-h-[100px] font-sans border border-dashed border-white/5 rounded-lg p-4 bg-white/[0.02]",
               isExporting && "border-none p-0",
             )}
           >
