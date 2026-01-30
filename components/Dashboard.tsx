@@ -9,7 +9,7 @@ export const Dashboard: React.FC = () => {
   const { syllabus_sections } = useCanvasStore();
 
   return (
-    <div className="w-full bg-[#1e1911] border-b border-white/5 py-4 px-6 overflow-x-auto">
+    <div id="tour-dashboard" className="w-full bg-[#1e1911] border-b border-white/5 py-4 px-6 overflow-x-auto">
       <div className="max-w-7xl mx-auto flex items-center justify-between min-w-[600px] gap-4">
         {syllabus_sections.map((section, index) => (
           <div key={section.id} className="flex items-center gap-3 flex-1">

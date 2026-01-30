@@ -141,7 +141,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
 
       <div
         className={cn(
-          "mt-4 flex flex-wrap gap-2 justify-center opacity-50 hover:opacity-100 transition-opacity print:hidden",
+          "tour-add-widgets mt-4 flex flex-wrap gap-2 justify-center opacity-50 hover:opacity-100 transition-opacity print:hidden",
           isExporting && "hidden",
         )}
       >

@@ -24,6 +24,8 @@ interface CanvasStore extends ProjectState {
   isExporting: boolean;
   setIsExporting: (isExporting: boolean) => void;
   setGridColumns: (columns: 1 | 2 | 3) => void;
+  runTour: boolean;
+  setRunTour: (run: boolean) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>()(
@@ -31,6 +33,8 @@ export const useCanvasStore = create<CanvasStore>()(
     (set) => ({
       isExporting: false,
       setIsExporting: (isExporting) => set({ isExporting }),
+      runTour: true, // Default to true so it runs on first visit
+      setRunTour: (run) => set({ runTour: run }),
       
       meta: {
         version: '1.0',

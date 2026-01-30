@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   Columns,
   Rows,
+  CircleHelp,
 } from "lucide-react";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { Button } from "@/components/ui/Button";
@@ -26,6 +27,7 @@ export const Header: React.FC = () => {
     setIsExporting,
     meta,
     setGridColumns,
+    setRunTour,
   } = useCanvasStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -87,6 +89,7 @@ export const Header: React.FC = () => {
           <span className="text-white/50 text-sm">CANVAS</span>
         </div>
         <input
+          id="tour-project-title"
           value={project.title}
           onChange={(e) => setProjectTitle(e.target.value)}
           className="bg-transparent border-none text-[var(--color-text)] font-bold text-lg focus:outline-none focus:ring-0 p-0 placeholder-white/30"
@@ -96,7 +99,7 @@ export const Header: React.FC = () => {
 
       <div className="flex items-center gap-2 lg:gap-4 flex-wrap justify-end">
         {/* View Options */}
-        <div className="flex items-center bg-white/5 rounded-md p-1 border border-white/10">
+        <div id="tour-grid-view" className="flex items-center bg-white/5 rounded-md p-1 border border-white/10">
           <button
             onClick={() => setGridColumns(1)}
             className={cn(
@@ -136,6 +139,7 @@ export const Header: React.FC = () => {
         </div>
 
         <input
+          id="tour-student-name"
           value={project.student_name}
           onChange={(e) => setStudentName(e.target.value)}
           className="bg-transparent border-b border-white/20 text-right text-sm focus:outline-none focus:border-[var(--color-primary)] w-32 lg:w-40 hidden md:block"
@@ -147,54 +151,67 @@ export const Header: React.FC = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={resetProject}
-          title="Limpiar Todo"
+          onClick={() => setRunTour(true)}
+          title="Ayuda / Tour"
         >
-          <RotateCcw className="w-4 h-4 md:mr-2" />
-          <span className="hidden md:inline">Reset</span>
+          <CircleHelp className="w-5 h-5" />
         </Button>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleDownload}
-          title="Descargar .gr"
-        >
-          <Download className="w-4 h-4 md:mr-2" />
-          <span className="hidden md:inline">Guardar</span>
-        </Button>
+        <div className="h-6 w-px bg-white/20 mx-2 hidden md:block" />
 
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-          title="Cargar .gr"
-        >
-          <Upload className="w-4 h-4 md:mr-2" />
-          <span className="hidden md:inline">Cargar</span>
-        </Button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          accept=".gr,.json"
-          onChange={handleUpload}
-        />
+        <div id="tour-actions" className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetProject}
+            title="Limpiar Todo"
+          >
+            <RotateCcw className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Reset</span>
+          </Button>
 
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handlePDFExport}
-          title="Exportar PDF"
-          disabled={isGeneratingPDF}
-        >
-          {isGeneratingPDF ? (
-            <Loader2 className="w-4 h-4 md:mr-2 animate-spin" />
-          ) : (
-            <FileJson className="w-4 h-4 md:mr-2" />
-          )}
-          <span className="hidden md:inline">PDF</span>
-        </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleDownload}
+            title="Descargar .gr"
+          >
+            <Download className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Guardar</span>
+          </Button>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            title="Cargar .gr"
+          >
+            <Upload className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Cargar</span>
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept=".gr,.json"
+            onChange={handleUpload}
+          />
+
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handlePDFExport}
+            title="Exportar PDF"
+            disabled={isGeneratingPDF}
+          >
+            {isGeneratingPDF ? (
+              <Loader2 className="w-4 h-4 md:mr-2 animate-spin" />
+            ) : (
+              <FileJson className="w-4 h-4 md:mr-2" />
+            )}
+            <span className="hidden md:inline">PDF</span>
+          </Button>
+        </div>
       </div>
     </header>
   );
