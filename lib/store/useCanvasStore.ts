@@ -2,6 +2,17 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import type { ProjectState, Widget, SyllabusSection, WidgetType } from '@/types/canvas';
+import { encryptData, decryptData } from '@/lib/crypto';
+import { v4 as uuidv4 } from 'uuid';
+
+// Debounce helper
+const debounce = (fn: Function, ms: number) => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return function (this: any, ...args: any[]) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), ms);
+  };
+};
 
 const DEFAULT_SECTIONS: SyllabusSection[] = [
   { id: 'section_1', title: 'FUNDAMENTOS Y RETENCIÓN', is_completed: false, widgets: [] },
@@ -10,6 +21,9 @@ const DEFAULT_SECTIONS: SyllabusSection[] = [
   { id: 'section_4', title: 'REVENUE & MONETIZACIÓN', is_completed: false, widgets: [] },
   { id: 'section_5', title: 'REFERRAL & LOOPS', is_completed: false, widgets: [] },
 ];
+
+// Module-level timeout for debouncing save
+let saveTimeout: ReturnType<typeof setTimeout>;
 
 interface CanvasStore extends ProjectState {
   setProjectTitle: (title: string) => void;
@@ -24,6 +38,16 @@ interface CanvasStore extends ProjectState {
   isExporting: boolean;
   setIsExporting: (isExporting: boolean) => void;
   setGridColumns: (columns: 1 | 2 | 3) => void;
+
+  // Sync & Security
+  encryptionPassword: string | null;
+  setEncryptionPassword: (password: string) => void;
+  isSyncing: boolean;
+  lastSyncedAt: string | null;
+  syncError: string | null;
+  saveCanvas: () => Promise<void>;
+  loadCanvas: (userId: string) => Promise<void>; // Requires userId to fetch
+  forcePush: () => Promise<void>; // Force push local state to server
 }
 
 export const useCanvasStore = create<CanvasStore>()(
@@ -31,7 +55,110 @@ export const useCanvasStore = create<CanvasStore>()(
     (set) => ({
       isExporting: false,
       setIsExporting: (isExporting) => set({ isExporting }),
-      
+
+      // Sync State
+      encryptionPassword: null, // Don't persist this by default for higher security? Or maybe we should?
+      // If using 'persist' middleware, it WILL be persisted if part of state.
+      // For now, let's persist it for UX (Cold Start). 
+      // Ideally, we'd use session storage or ask on load.
+      isSyncing: false,
+      lastSyncedAt: null,
+      syncError: null,
+
+      setEncryptionPassword: (password) => set({ encryptionPassword: password }),
+
+      saveCanvas: async () => {
+        const state = get();
+        if (!state.encryptionPassword) return; // Cannot save without password
+
+        // Debounced Save Logic could be handled here or by caller. 
+        // For "auto saving al terminar de editar", we might want immediate or short debounce.
+
+        set({ isSyncing: true, syncError: null });
+
+        try {
+          const dataToEncrypt = {
+            project: state.project,
+            syllabus_sections: state.syllabus_sections,
+            meta: state.meta
+          };
+
+          // Encrypt
+          const encrypted = await encryptData(dataToEncrypt, state.encryptionPassword);
+          const canvasId = state.project.id || 'default-canvas'; // TODO: Manage IDs properly
+
+          // Save to API
+          // We need userId here. Ideally stored in user session or passed in. 
+          // For this 'local-first' attempt, we might need a userId in the store or passed from a component.
+          // Let's assume there's a user context we can grab, OR we store userId in the store too.
+          // For now, let's mock userId or fail if missing.
+          const userId = 'user-123'; // FIXME: Get real userId
+
+          const response = await fetch('/api/canvas/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              canvasId,
+              userId, // Sending userId is insecure if not verified by session, but matches current plan
+              ...encrypted
+            })
+          });
+
+          if (!response.ok) throw new Error('Failed to save');
+
+          set({ isSyncing: false, lastSyncedAt: new Date().toISOString() });
+        } catch (error) {
+          console.error("Sync error:", error);
+          set({ isSyncing: false, syncError: 'Failed to save to cloud.' });
+        }
+      },
+
+      loadCanvas: async (userId: string) => {
+        const state = get();
+        if (!state.encryptionPassword) return;
+
+        set({ isSyncing: true, syncError: null });
+        try {
+          const response = await fetch(`/api/canvas/load?userId=${userId}`);
+          if (!response.ok) {
+            if (response.status === 404) {
+              // No remote data, that's fine, keep local
+              set({ isSyncing: false });
+              return;
+            }
+            throw new Error('Failed to load');
+          }
+
+          const data = await response.json();
+          if (!data.canvas) {
+            set({ isSyncing: false });
+            return;
+          }
+
+          // Decrypt
+          // Check if remote is newer? 
+          // For cold start, we usually want remote if local is stale or empty.
+          // Let's just decrypt and load for now.
+          const decryptedState = await decryptData(data.canvas.data, data.canvas.iv, data.canvas.salt, state.encryptionPassword);
+
+          set({
+            project: decryptedState.project,
+            syllabus_sections: decryptedState.syllabus_sections, // Merge? No, overwrite for now.
+            meta: decryptedState.meta,
+            isSyncing: false,
+            lastSyncedAt: data.canvas.updatedAt
+          });
+
+        } catch (error) {
+          console.error("Load error:", error);
+          set({ isSyncing: false, syncError: 'Failed to load/decrypt from cloud.' });
+        }
+      },
+
+      forcePush: async () => {
+        await get().saveCanvas();
+      },
+
       meta: {
         version: '1.0',
         last_modified: new Date().toISOString(),
@@ -49,19 +176,23 @@ export const useCanvasStore = create<CanvasStore>()(
           meta: { ...state.meta, grid_columns: columns, last_modified: new Date().toISOString() },
         })),
 
-      setProjectTitle: (title) =>
+      setProjectTitle: (title) => {
         set((state) => ({
           project: { ...state.project, title },
           meta: { ...state.meta, last_modified: new Date().toISOString() },
-        })),
+        }));
+        get().saveCanvas();
+      },
 
-      setStudentName: (name) =>
+      setStudentName: (name) => {
         set((state) => ({
           project: { ...state.project, student_name: name },
           meta: { ...state.meta, last_modified: new Date().toISOString() },
-        })),
+        }));
+        get().saveCanvas();
+      },
 
-      addWidget: (sectionId, type, parentId) =>
+      addWidget: (sectionId, type, parentId) => {
         set((state) => {
           const newWidget: Widget = {
             id: uuidv4(),
@@ -94,9 +225,11 @@ export const useCanvasStore = create<CanvasStore>()(
             ),
             meta: { ...state.meta, last_modified: new Date().toISOString() },
           };
-        }),
+        });
+        get().saveCanvas();
+      },
 
-      updateWidget: (sectionId, widgetId, data) =>
+      updateWidget: (sectionId, widgetId, data) => {
         set((state) => {
           const updateRecursive = (widgets: Widget[]): Widget[] => {
             return widgets.map(w => {
@@ -116,9 +249,11 @@ export const useCanvasStore = create<CanvasStore>()(
             ),
             meta: { ...state.meta, last_modified: new Date().toISOString() },
           }
-        }),
+        });
+        get().saveCanvas();
+      },
 
-      removeWidget: (sectionId, widgetId) =>
+      removeWidget: (sectionId, widgetId) => {
         set((state) => {
           const removeRecursive = (widgets: Widget[]): Widget[] => {
             return widgets.filter(w => w.id !== widgetId).map(w => {
@@ -135,9 +270,11 @@ export const useCanvasStore = create<CanvasStore>()(
             ),
             meta: { ...state.meta, last_modified: new Date().toISOString() },
           }
-        }),
+        });
+        get().saveCanvas();
+      },
 
-      moveWidget: (sectionId, activeId, overId) =>
+      moveWidget: (sectionId, activeId, overId) => {
         set((state) => {
           // Basic reordering implementation (flat list for now, nested reordering is complex)
           // Ideally we use @dnd-kit's arrayMove
@@ -160,24 +297,30 @@ export const useCanvasStore = create<CanvasStore>()(
             ),
             meta: { ...state.meta, last_modified: new Date().toISOString() },
           }
-        }),
+        });
+        get().saveCanvas();
+      },
 
-      resetProject: () =>
+      resetProject: () => {
         set({
           syllabus_sections: DEFAULT_SECTIONS,
           project: { title: 'Nuevo Proyecto', student_name: '' },
           meta: { version: '1.0', last_modified: new Date().toISOString(), theme: 'rockstar-default' },
-        }),
+        });
+        get().saveCanvas();
+      },
 
       loadProject: (newState) => set(newState),
 
-      toggleSectionComplete: (sectionId) =>
+      toggleSectionComplete: (sectionId) => {
         set((state) => ({
           syllabus_sections: state.syllabus_sections.map((s) =>
             s.id === sectionId ? { ...s, is_completed: !s.is_completed } : s
           ),
           meta: { ...state.meta, last_modified: new Date().toISOString() },
-        })),
+        }));
+        get().saveCanvas();
+      },
     }),
     {
       name: 'growth-rockstar-canvas-storage',

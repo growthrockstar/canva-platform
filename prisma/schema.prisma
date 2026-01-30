@@ -52,7 +52,9 @@ model Session {
 model Canvas {
   id          String   @id @default(uuid())
   title       String
-  data        Json     // Stores the entire canvas state (sections, widgets, etc.)
+  data        String   // Stores the encrypted canvas state
+  iv          String   // Initialization vector for encryption
+  salt        String   // Salt used for key derivation
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
