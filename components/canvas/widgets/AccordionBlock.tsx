@@ -6,7 +6,10 @@ import type { Widget } from '@/types/canvas';
 import { useCanvasStore } from '@/lib/store/useCanvasStore';
 import { Button } from '@/components/ui/Button';
 import { WidgetRenderer } from "../WidgetRenderer";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableWidget } from "../SortableWidget";
 import { cn } from '@/lib/utils';
+import { useDroppable } from "@dnd-kit/core";
 
 interface AccordionBlockProps {
   widget: Widget;
@@ -21,6 +24,13 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { addWidget, isExporting } = useCanvasStore();
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: `container-${widget.id}`,
+    data: {
+      type: 'container',
+      parentId: widget.id
+    }
+  });
 
   const toggleOpen = () => setIsOpen(!isOpen);
 
@@ -29,10 +39,10 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
   return (
     <div
       className={cn(
-        "border rounded transition-colors overflow-hidden print:border-none print:overflow-visible",
+        "border rounded transition-colors print:border-none print:overflow-visible",
         shouldShow
-          ? "border-[var(--color-primary)] bg-black/20"
-          : "border-white/20 hover:border-white/40",
+          ? "border-[var(--color-primary)] bg-black/20 overflow-visible"
+          : "border-white/20 hover:border-white/40 overflow-hidden",
         isExporting && "overflow-visible" // Prevent clipping during export
       )}
     >
@@ -74,24 +84,29 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
 
       {(shouldShow || true) && (
         <div
+          ref={setDroppableRef}
           className={cn(
-            "p-4 border-t border-white/10 space-y-4 duration-200 print:block print:border-none print:p-0",
-            !isExporting && "animate-in slide-in-from-top-2", // Disable animation during export
+            "pr-4 pl-6 pt-4 pb-4 border-t border-white/10 space-y-4 duration-200 print:block print:border-none print:p-0 min-h-[60px]", // Added min-h for drop target
+            !isExporting && "animate-in slide-in-from-top-2",
             shouldShow ? "block" : "hidden print:block",
           )}
         >
-          {widget.children?.map((child) => (
-            <div
-              key={child.id}
-              className="relative group/child pl-4 border-l-2 border-white/5 print:border-l-0 print:pl-0"
-            >
-              <WidgetRenderer
-                widget={child}
-                sectionId={sectionId}
-                parentId={widget.id}
-              />
-            </div>
-          ))}
+          <SortableContext
+            items={widget.children?.map((child) => child.id) || []}
+            strategy={verticalListSortingStrategy}
+          >
+            {widget.children?.map((child) => (
+              <SortableWidget key={child.id} id={child.id}>
+                <div className="relative group/child pl-4 border-l-2 border-white/5 print:border-l-0 print:pl-0">
+                  <WidgetRenderer
+                    widget={child}
+                    sectionId={sectionId}
+                    parentId={widget.id}
+                  />
+                </div>
+              </SortableWidget>
+            ))}
+          </SortableContext>
 
           <div
             className={cn(

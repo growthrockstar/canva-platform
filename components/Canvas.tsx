@@ -6,10 +6,11 @@ import { Section } from "./canvas/Section";
 import { cn } from "@/lib/utils";
 
 export const Canvas: React.FC = () => {
-  const { syllabus_sections, isExporting, meta, encryptionPassword, isSyncing, lastSyncedAt, syncError, loadCanvas } = useCanvasStore();
+  const { syllabus_sections, isExporting, meta, encryptionPassword, isSyncing, lastSyncedAt, syncError, loadCanvas, fetchSections } = useCanvasStore();
   const cols = meta.grid_columns || 1;
 
   React.useEffect(() => {
+    fetchSections();
     // If we have a password, we can sync.
     // If not, we are likely offline or just logged in.
     if (encryptionPassword) {
@@ -88,7 +89,7 @@ export const Canvas: React.FC = () => {
           isExporting ? "hidden" : "print:hidden",
         )}
       >
-        <p className="text-sm">Growth Rockstar Canvas - Local First Edition</p>
+        <p className="text-sm">Growth Rockstar Canvas</p>
       </footer>
     </div>
   );

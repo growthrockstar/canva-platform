@@ -342,12 +342,12 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
         </thead>
         <tbody>
           {rawData.map((row, rowIndex) => (
-            <tr key={rowIndex}>
+            <tr key={rowIndex} className="group/row">
               <td className="p-2 bg-black/20 text-xs text-white/50 border border-white/10 font-mono text-center">
                 {rowIndex + 1}
               </td>
               {row.map((cell, colIndex) => (
-                <td key={colIndex} className="border border-white/10 p-0 relative group min-w-[100px]">
+                <td key={colIndex} className="border border-white/10 p-0 relative group/cell min-w-[100px]">
                   {isExporting ? (
                     <div className={`w-full h-full p-2 bg-transparent ${rowIndex === 0 ? 'font-bold text-[var(--color-primary)]' : 'text-white/80'}`}>
                       {getCellDisplayValue(rowIndex, colIndex, cell)}
@@ -368,23 +368,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
 
                         // Delay clearing editing cell to allow suggestion click to fire
                         setTimeout(() => {
-                          // If we weren't just picking a suggestion (logic handled in click)
-                          // But here we need to be careful not to clear if we are just clicking another cell for range selection
-                          // Actually range selection keeps focus on original cell, so blur happens on original cell only if we click outside entirely 
-                          // or if we switch focus to another cell normally. 
-                          // If we click another cell in range mode, we preventDefault so blur shouldn't happen?
-                          // Wait, if I click another input, the current one blurs.
-                          // Range selection is tricky: if I mouseDown on another cell, browser attempts to focus it, firing blur on current.
-                          // preventDefault on mouseDown should stop focus change.
-
-                          // Let's rely on setEditingCell(null) only if we aren't in range select mode? 
-                          // Simplified: Just update `setEditingCell(null)` here unless we deal with specific retention cases.
-                          // The ranges selection logic is: click other cell -> preventDefault -> focus stays on current cell. 
-                          // So onBlur shouldn't fire for the current cell in that case.
-                          // We only setEditingCell(null) if focus actually leaves.
                           if (!showSuggestions) {
-                            // We check relatedTarget? checking activeElement might be too late.
-                            // For now standard behavior.
                             setEditingCell(null);
                           }
                         }, 150);
@@ -397,21 +381,31 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                   )}
                   {/* Suggestions Popover moved to Portal */}
 
-                  {rowIndex === 0 && (
-                    <button
-                      onClick={() => removeColumn(colIndex)}
-                      className="absolute -top-3 right-0 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full p-0.5 z-10"
-                      title="Borrar columna"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                  {rowIndex === 0 && !isExporting && (
+                    <div className="absolute -top-3 right-0 z-10 opacity-0 group-hover/cell:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-red-500/50 hover:text-red-500 hover:bg-black/50 rounded-full"
+                        onClick={() => removeColumn(colIndex)}
+                        title="Borrar columna"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   )}
                 </td>
               ))}
               {!isExporting && (
-                <td className="p-2 w-10 border-none">
-                  <Button size="sm" variant="ghost" onClick={() => removeRow(rowIndex)} title="Borrar fila">
-                    <Trash2 className="w-4 h-4 text-red-500/50 hover:text-red-500" />
+                <td className="p-2 w-10 border-none opacity-0 group-hover/row:opacity-100 transition-opacity">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => removeRow(rowIndex)}
+                    title="Borrar fila"
+                    className="h-8 w-8 p-0 text-red-500/50 hover:text-red-500 hover:bg-white/5"
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </td>
               )}

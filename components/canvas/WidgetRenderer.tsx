@@ -43,7 +43,8 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget, sectionI
 
   return (
     <div className="relative group/widget mb-4 last:mb-0">
-      <div className="absolute -left-10 top-0 opacity-0 group-hover/widget:opacity-100 transition-opacity flex flex-col gap-1 print:hidden">
+      {renderContent()}
+      <div className="absolute -right-10 top-0 opacity-0 group-hover/widget:opacity-100 transition-opacity flex flex-col gap-1 print:hidden z-50">
         <Button
           variant="ghost"
           size="sm"
@@ -54,7 +55,6 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget, sectionI
           <Trash2 className="w-4 h-4" />
         </Button>
       </div>
-      {renderContent()}
     </div>
   );
 };

@@ -68,3 +68,11 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model Section {
+  id        String   @id @default(uuid())
+  title     String
+  orderIndex Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -13,13 +13,7 @@ const debounce = (fn: Function, ms: number) => {
   };
 };
 
-const DEFAULT_SECTIONS: SyllabusSection[] = [
-  { id: 'section_1', title: 'FUNDAMENTOS Y RETENCIÓN', is_completed: false, widgets: [] },
-  { id: 'section_2', title: 'ADQUISICIÓN', is_completed: false, widgets: [] },
-  { id: 'section_3', title: 'ACTIVACIÓN', is_completed: false, widgets: [] },
-  { id: 'section_4', title: 'REVENUE & MONETIZACIÓN', is_completed: false, widgets: [] },
-  { id: 'section_5', title: 'REFERRAL & LOOPS', is_completed: false, widgets: [] },
-];
+const DEFAULT_SECTIONS: SyllabusSection[] = [];
 
 // Module-level timeout for debouncing save
 let saveTimeout: ReturnType<typeof setTimeout>;
@@ -51,6 +45,9 @@ interface CanvasStore extends ProjectState {
   // Tour
   runTour: boolean;
   setRunTour: (run: boolean) => void;
+
+  // Sections
+  fetchSections: () => Promise<void>;
 }
 
 export const useCanvasStore = create<CanvasStore>()(
@@ -270,24 +267,73 @@ export const useCanvasStore = create<CanvasStore>()(
 
       moveWidget: (sectionId, activeId, overId) => {
         set((state) => {
-          // Basic reordering implementation (flat list for now, nested reordering is complex)
-          // Ideally we use @dnd-kit's arrayMove
           const section = state.syllabus_sections.find(s => s.id === sectionId);
           if (!section) return state;
 
-          // Find indices
-          const oldIndex = section.widgets.findIndex(w => w.id === activeId);
-          const newIndex = section.widgets.findIndex(w => w.id === overId);
+          // Helper to find parent array and index of a widget
+          const findWidgetParent = (widgets: Widget[], targetId: string): { parent: Widget[] | null, index: number, containerWidget?: Widget } => {
+            for (let i = 0; i < widgets.length; i++) {
+              if (widgets[i].id === targetId) {
+                return { parent: widgets, index: i };
+              }
+              if (widgets[i].children) {
+                const found = findWidgetParent(widgets[i].children!, targetId);
+                if (found.parent) {
+                  return { ...found, containerWidget: widgets[i] };
+                }
+              }
+            }
+            return { parent: null, index: -1 };
+          };
 
-          if (oldIndex === -1 || newIndex === -1) return state;
+          // Clone the section widgets to mutate
+          // Clone the section widgets to mutate
+          const newSectionWidgets = JSON.parse(JSON.stringify(section.widgets));
 
-          const newWidgets = [...section.widgets];
-          const [movedItem] = newWidgets.splice(oldIndex, 1);
-          newWidgets.splice(newIndex, 0, movedItem);
+          const source = findWidgetParent(newSectionWidgets, activeId);
+
+          let dest: { parent: Widget[] | null, index: number, containerWidget?: Widget };
+
+          // Logic to handle dropping onto a container (e.g. empty accordion)
+          if (overId.toString().startsWith('container-')) {
+            const containerId = overId.toString().replace('container-', '');
+
+            // Helper to find the widget that *is* the container
+            const findContainerWidget = (widgets: Widget[]): Widget | null => {
+              for (const w of widgets) {
+                if (w.id === containerId) return w;
+                if (w.children) {
+                  const found = findContainerWidget(w.children);
+                  if (found) return found;
+                }
+              }
+              return null;
+            };
+
+            const container = findContainerWidget(newSectionWidgets);
+            if (container) {
+              if (!container.children) container.children = [];
+              // Drop at the end of the list
+              dest = { parent: container.children, index: container.children.length };
+            } else {
+              dest = { parent: null, index: -1 };
+            }
+          } else {
+            // Normal drop onto another item
+            dest = findWidgetParent(newSectionWidgets, overId);
+          }
+
+          if (!source.parent || !dest.parent) {
+            // console.log("Source or dest not found", activeId, overId);
+            return state;
+          }
+
+          const [movedItem] = source.parent.splice(source.index, 1);
+          dest.parent.splice(dest.index, 0, movedItem);
 
           return {
             syllabus_sections: state.syllabus_sections.map(s =>
-              s.id === sectionId ? { ...s, widgets: newWidgets } : s
+              s.id === sectionId ? { ...s, widgets: newSectionWidgets } : s
             ),
             meta: { ...state.meta, last_modified: new Date().toISOString() },
           }
@@ -306,6 +352,7 @@ export const useCanvasStore = create<CanvasStore>()(
 
       loadProject: (newState) => set(newState),
 
+
       toggleSectionComplete: (sectionId) => {
         set((state) => ({
           syllabus_sections: state.syllabus_sections.map((s) =>
@@ -314,6 +361,38 @@ export const useCanvasStore = create<CanvasStore>()(
           meta: { ...state.meta, last_modified: new Date().toISOString() },
         }));
         get().saveCanvas();
+      },
+
+      fetchSections: async () => {
+        try {
+          const res = await fetch('/api/sections');
+          if (!res.ok) throw new Error('Failed to fetch sections');
+          const data = await res.json();
+
+          if (data.sections && Array.isArray(data.sections)) {
+            set((state) => {
+              const currentSections = state.syllabus_sections;
+
+              const newSections = data.sections.map((dbSection: any) => {
+                // Try to find existing section by title to keep widgets
+                const existing = currentSections.find(s => s.title === dbSection.title);
+                return {
+                  id: dbSection.id, // Use DB ID
+                  title: dbSection.title,
+                  is_completed: existing ? existing.is_completed : false,
+                  widgets: existing ? existing.widgets : []
+                };
+              });
+
+              return {
+                syllabus_sections: newSections,
+                meta: { ...state.meta, last_modified: new Date().toISOString() }
+              };
+            });
+          }
+        } catch (error) {
+          console.error("Error loading sections:", error);
+        }
       },
     }),
     {

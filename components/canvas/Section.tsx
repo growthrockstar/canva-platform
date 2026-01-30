@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
+import { DndContext, pointerWithin, DragOverlay, type DragEndEvent, type DragOverEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -29,9 +29,55 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
     setIsExporting,
   } = useCanvasStore();
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Recursive helper to find a widget by ID
+  const findWidget = React.useCallback((widgets: any[], id: string): any | null => {
+    for (const w of widgets) {
+      if (w.id === id) return w;
+      if (w.children) {
+        const found = findWidget(w.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  }, []);
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    // Use a different action for "visual" updates?
+    // Actually, dnd-kit recommends modifying the items state during dragOver.
+    // But our state is in a global store with "save on change".
+    // If we call moveWidget here, it might trigger saves.
+    // However, if we don't, the visual layout won't update.
+
+    // Ideally we should have a "setItems" that doesn't save, or moveWidget has a flag.
+    // But for now, let's try calling moveWidget.
+    // The debounce in saveCanvas (1000ms) should prevent excessive API calls.
+
+    if (active.id !== over.id) {
+      // Only if containers are different or we are moving into a container?
+      // This is complex. 
+      // If we just rely on the fact that dnd-kit's "sortable" strategy handles reordering within the SAME context automatically via transforms?
+      // No, dnd-kit requires the items prop passed to SortableContext to be updated to show the placeholder in the new spot.
+
+      // So yes, we MUST update the store state.
+      moveWidget(section.id, active.id as string, over.id as string);
+    }
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    // The final move is already done by onDragOver usually, 
+    // but we can ensure consistency here.
+    // Or if we only use onDragEnd, we get the issue user described.
+
     const { active, over } = event;
+    // We don't need to do anything if onDragOver handled it, 
+    // but onDragEnd is good for the "final" commit if we were using local state.
+    // Since we are using global state, onDragOver already mutated it.
+    // But just in case:
     if (over && active.id !== over.id) {
       moveWidget(section.id, active.id as string, over.id as string);
     }
@@ -114,7 +160,13 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
         </div>
       </div>
 
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext
+        collisionDetection={pointerWithin}
+        onDragStart={(e) => setActiveId(e.active.id as string)}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveId(null)}
+      >
         <SortableContext
           items={section.widgets.map((w) => w.id)}
           strategy={verticalListSortingStrategy}
@@ -137,6 +189,16 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
             ))}
           </div>
         </SortableContext>
+        <DragOverlay>
+          {activeId ? (
+            <div className="opacity-80">
+              <WidgetRenderer
+                widget={findWidget(section.widgets, activeId)!}
+                sectionId={section.id}
+              />
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
 
       <div
