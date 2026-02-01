@@ -21,11 +21,13 @@ export const LeftSidebar: React.FC = () => {
   } = useCanvasStore();
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showQualityOptions, setShowQualityOptions] = useState(false);
 
   // PDF Export Logic
   const handlePDFExport = async (scale: number) => {
     setIsGeneratingPDF(true);
     setIsExporting(true);
+    setShowQualityOptions(false); // Close menu
     setTimeout(async () => {
       await generateFullPDF(project.title, scale);
       setIsExporting(false);
@@ -125,7 +127,7 @@ export const LeftSidebar: React.FC = () => {
                   onClick={() => setFocusedSectionId(section.id)}
                   title={section.title}
                   className={cn(
-                    "aspect-square rounded-md flex items-center justify-center font-title font-bold text-lg transition-all duration-200 border",
+                    "aspect-square cursor-pointer rounded-md flex items-center justify-center font-title font-bold text-lg transition-all duration-200 border",
                     isCompleted
                       ? "bg-[#eeff8d] text-[#010101] border-[#eeff8d]"
                       : "bg-white text-[#010101] border-[#010101]/10",
@@ -154,19 +156,47 @@ export const LeftSidebar: React.FC = () => {
             Herramientas
           </span>
 
-          <Button
-            variant="primary"
-            className="w-full justify-start bg-[#010101] text-white hover:bg-[#010101]/80"
-            onClick={() => handlePDFExport(2)}
-            disabled={isGeneratingPDF}
-          >
-            {isGeneratingPDF ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : (
-              <FileJson className="w-4 h-4 mr-2" />
+          <div className="relative">
+            <Button
+              variant="primary"
+              className="w-full justify-start bg-[#010101] text-white hover:bg-[#010101]/80"
+              onClick={() => setShowQualityOptions(!showQualityOptions)}
+              disabled={isGeneratingPDF}
+            >
+              {isGeneratingPDF ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <FileJson className="w-4 h-4 mr-2" />
+              )}
+              <span>Exportar PDF</span>
+            </Button>
+
+            {showQualityOptions && (
+              <div className="absolute bottom-full left-0 w-full bg-white border border-[#010101]/10 rounded-lg shadow-xl mb-2 overflow-hidden z-20">
+                 <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-[#010101]/40 font-bold bg-[#f9f9f9] border-b border-[#010101]/5">
+                    Calidad
+                 </div>
+                 <button
+                    onClick={() => handlePDFExport(1)}
+                    className="w-full text-left px-4 py-2 text-sm text-[#010101] hover:bg-[#f2f2f2] transition-colors"
+                 >
+                    Baja (Rápida)
+                 </button>
+                 <button
+                    onClick={() => handlePDFExport(2)}
+                    className="w-full text-left px-4 py-2 text-sm text-[#010101] hover:bg-[#f2f2f2] transition-colors"
+                 >
+                    Media (Estándar)
+                 </button>
+                 <button
+                    onClick={() => handlePDFExport(3)}
+                    className="w-full text-left px-4 py-2 text-sm font-bold text-[#010101] hover:bg-[#f2f2f2] transition-colors"
+                 >
+                    Alta (HD)
+                 </button>
+              </div>
             )}
-            <span>Exportar PDF</span>
-          </Button>
+          </div>
 
           <Button
             variant="ghost"

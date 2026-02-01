@@ -56,37 +56,13 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
     const { active, over } = event;
     if (!over) return;
 
-    // Use a different action for "visual" updates?
-    // Actually, dnd-kit recommends modifying the items state during dragOver.
-    // But our state is in a global store with "save on change".
-    // If we call moveWidget here, it might trigger saves.
-    // However, if we don't, the visual layout won't update.
-
-    // Ideally we should have a "setItems" that doesn't save, or moveWidget has a flag.
-    // But for now, let's try calling moveWidget.
-    // The debounce in saveCanvas (1000ms) should prevent excessive API calls.
-
     if (active.id !== over.id) {
-      // Only if containers are different or we are moving into a container?
-      // This is complex.
-      // If we just rely on the fact that dnd-kit's "sortable" strategy handles reordering within the SAME context automatically via transforms?
-      // No, dnd-kit requires the items prop passed to SortableContext to be updated to show the placeholder in the new spot.
-
-      // So yes, we MUST update the store state.
       moveWidget(section.id, active.id as string, over.id as string);
     }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    // The final move is already done by onDragOver usually,
-    // but we can ensure consistency here.
-    // Or if we only use onDragEnd, we get the issue user described.
-
     const { active, over } = event;
-    // We don't need to do anything if onDragOver handled it,
-    // but onDragEnd is good for the "final" commit if we were using local state.
-    // Since we are using global state, onDragOver already mutated it.
-    // But just in case:
     if (over && active.id !== over.id) {
       moveWidget(section.id, active.id as string, over.id as string);
     }
@@ -95,12 +71,12 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
   const handleShareImage = async () => {
     setIsGeneratingImage(true);
     setIsExporting(true);
-    // Wait for React to render the "Export Mode" changes (logo, expanded accordions)
+    // Wait for React to render the "Export Mode" changes
     setTimeout(async () => {
       await generateSectionImage(section.id, section.title);
       setIsExporting(false);
       setIsGeneratingImage(false);
-    }, 500); // 500ms delay to ensure render
+    }, 500);
   };
 
   return (
@@ -108,13 +84,13 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
       id={section.id}
       className={cn(
         "mb-12 print:mb-8  print:break-inside-avoid relative",
-        isExporting && "bg-background p-8 mb-0",
+        isExporting && " p-8 mb-0 ",
       )}
     >
       {/* Section Header */}
       <div className="flex items-center justify-between  mb-6 border-b border-[var(--color-primary)]/30 pb-2">
-        <div className="flex flex-col font-title ">
-          <h2 className="text-2xl font-bold  text-[var(--color-primary)] flex items-center gap-3">
+        <div className="flex flex-col font-title">
+          <h2 className="text-2xl font-bold text-[var(--color-primary)] flex items-center gap-3">
             <span
               className={cn(
                 "text-black/90 text-3xl print:text-black/50",
@@ -126,12 +102,13 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
             {section.title}
           </h2>
         </div>
+
         {isGeneratingImage && (
           <img
             src="/LOGOGROWTH.png"
             alt="Growth Rockstar"
             width={200}
-            className="opacity-80  "
+            className="opacity-80 mb-4"
           />
         )}
 
@@ -142,7 +119,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
             size="sm"
             onClick={handleShareImage}
             disabled={isGeneratingImage}
-            className=" text-primary hover:text-[#d5454e]"
+            className="text-[var(--color-primary)] hover:text-[var(--color-primary)]/70"
             title="Compartir Imagen"
           >
             {isGeneratingImage ? (
@@ -157,7 +134,9 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
             onClick={() => toggleSectionComplete(section.id)}
             className={cn(
               "print:hidden",
-              section.is_completed ? "text-[#d5454e]" : "text-primary",
+              section.is_completed
+                ? "text-[var(--color-primary)]"
+                : "text-[var(--color-primary)]/30",
             )}
           >
             {section.is_completed ? (
@@ -187,7 +166,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
             )}
           >
             {section.widgets.length === 0 && !isExporting && (
-              <div className="text-center py-8 text-white/20 italic select-none">
+              <div className="text-center py-8 text-black/20 italic select-none">
                 Arrastra bloques o agrega contenido aquí
               </div>
             )}
