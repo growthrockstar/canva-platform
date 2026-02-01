@@ -1,17 +1,17 @@
 "use client";
 
-import React from 'react';
-import { Trash2 } from 'lucide-react';
-import type { Widget } from '@/types/canvas';
-import { useCanvasStore } from '@/lib/store/useCanvasStore';
-import { TextBlock } from './widgets/TextBlock';
-import { ImageBlock } from './widgets/ImageBlock';
-import { TableBlock } from './widgets/TableBlock';
-import { GraphBlock } from './widgets/GraphBlock';
+import React from "react";
+import { Trash2 } from "lucide-react";
+import type { Widget } from "@/types/canvas";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { TextBlock } from "./widgets/TextBlock";
+import { ImageBlock } from "./widgets/ImageBlock";
+import { TableBlock } from "./widgets/TableBlock";
+import { GraphBlock } from "./widgets/GraphBlock";
 
-import { AccordionBlock } from './widgets/AccordionBlock';
-import { LinkBlock } from './widgets/LinkBlock';
-import { Button } from '../ui/Button';
+import { AccordionBlock } from "./widgets/AccordionBlock";
+import { LinkBlock } from "./widgets/LinkBlock";
+import { Button } from "../ui/Button";
 
 interface WidgetRendererProps {
   widget: Widget;
@@ -19,7 +19,10 @@ interface WidgetRendererProps {
   parentId?: string;
 }
 
-export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget, sectionId }) => {
+export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
+  widget,
+  sectionId,
+}) => {
   const { updateWidget, removeWidget } = useCanvasStore();
 
   const handleUpdate = (data: Partial<Widget>) => {
@@ -28,17 +31,23 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget, sectionI
 
   const renderContent = () => {
     switch (widget.type) {
-      case 'text_block':
+      case "text_block":
         return <TextBlock widget={widget} onUpdate={handleUpdate} />;
-      case 'image_base64':
+      case "image_base64":
         return <ImageBlock widget={widget} onUpdate={handleUpdate} />;
-      case 'table':
+      case "table":
         return <TableBlock widget={widget} onUpdate={handleUpdate} />;
-      case 'graph_plot':
+      case "graph_plot":
         return <GraphBlock widget={widget} onUpdate={handleUpdate} />;
-      case 'accordion':
-        return <AccordionBlock widget={widget} sectionId={sectionId} onUpdate={handleUpdate} />;
-      case 'link_block':
+      case "accordion":
+        return (
+          <AccordionBlock
+            widget={widget}
+            sectionId={sectionId}
+            onUpdate={handleUpdate}
+          />
+        );
+      case "link_block":
         return <LinkBlock widget={widget} onUpdate={handleUpdate} />;
       default:
         return null; // Fallback
@@ -52,7 +61,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({ widget, sectionI
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-500/10"
+          className="h-8 w-8 p-0 text-[#d5454e] hover:text-[#d5454e] hover:bg-[#d5454e]/10"
           onClick={() => removeWidget(sectionId, widget.id)}
           title="Eliminar widget"
         >

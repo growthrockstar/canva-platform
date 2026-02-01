@@ -60,7 +60,9 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
         const el = node as Element;
         const tagName = el.tagName.toLowerCase();
 
-        const content = Array.from(el.childNodes).map(processInlineNode).join("");
+        const content = Array.from(el.childNodes)
+          .map(processInlineNode)
+          .join("");
 
         switch (tagName) {
           case "b":

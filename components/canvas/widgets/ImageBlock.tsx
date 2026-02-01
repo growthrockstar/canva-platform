@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef } from 'react';
-import { X, Image as ImageIcon } from 'lucide-react';
-import type { Widget } from '@/types/canvas';
-import { Button } from '@/components/ui/Button';
+import React, { useRef } from "react";
+import { X, Image as ImageIcon } from "lucide-react";
+import type { Widget } from "@/types/canvas";
+import { Button } from "@/components/ui/Button";
 
 interface ImageBlockProps {
   widget: Widget;
@@ -31,8 +31,12 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({ widget, onUpdate }) => {
 
   if (widget.src) {
     return (
-      <div className="relative group rounded-md overflow-hidden border border-white/10 bg-black/20">
-        <img src={widget.src} alt="Uploaded" className="max-w-full h-auto mx-auto" />
+      <div className="relative group rounded-md overflow-hidden border border-white/10 ">
+        <img
+          src={widget.src}
+          alt="Uploaded"
+          className="max-w-full h-auto mx-auto"
+        />
         <Button
           variant="secondary"
           size="sm"
@@ -46,18 +50,18 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({ widget, onUpdate }) => {
   }
 
   return (
-    <div 
-        className="border-2 border-dashed border-white/10 rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[var(--color-primary)]/50 hover:bg-white/5 transition-colors"
-        onClick={() => fileInputRef.current?.click()}
+    <div
+      className="border-2 border-dashed border-black/80 rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[var(--color-primary)]/50 hover:bg-white/5 transition-colors"
+      onClick={() => fileInputRef.current?.click()}
     >
-      <ImageIcon className="w-8 h-8 text-white/30 mb-2" />
-      <span className="text-sm text-white/50">Click para subir imagen (max 500KB)</span>
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        className="hidden" 
-        accept="image/*" 
-        onChange={handleUpload} 
+      <ImageIcon className="w-8 h-8  mb-2" />
+      <span className="text-sm ">Click para subir imagen (max 500KB)</span>
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleUpload}
       />
     </div>
   );

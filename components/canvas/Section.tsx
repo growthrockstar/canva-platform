@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { DndContext, pointerWithin, DragOverlay, type DragEndEvent, type DragOverEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  pointerWithin,
+  DragOverlay,
+  type DragEndEvent,
+  type DragOverEvent,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -32,16 +38,19 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // Recursive helper to find a widget by ID
-  const findWidget = React.useCallback((widgets: any[], id: string): any | null => {
-    for (const w of widgets) {
-      if (w.id === id) return w;
-      if (w.children) {
-        const found = findWidget(w.children, id);
-        if (found) return found;
+  const findWidget = React.useCallback(
+    (widgets: any[], id: string): any | null => {
+      for (const w of widgets) {
+        if (w.id === id) return w;
+        if (w.children) {
+          const found = findWidget(w.children, id);
+          if (found) return found;
+        }
       }
-    }
-    return null;
-  }, []);
+      return null;
+    },
+    [],
+  );
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
@@ -59,7 +68,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
 
     if (active.id !== over.id) {
       // Only if containers are different or we are moving into a container?
-      // This is complex. 
+      // This is complex.
       // If we just rely on the fact that dnd-kit's "sortable" strategy handles reordering within the SAME context automatically via transforms?
       // No, dnd-kit requires the items prop passed to SortableContext to be updated to show the placeholder in the new spot.
 
@@ -69,12 +78,12 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    // The final move is already done by onDragOver usually, 
+    // The final move is already done by onDragOver usually,
     // but we can ensure consistency here.
     // Or if we only use onDragEnd, we get the issue user described.
 
     const { active, over } = event;
-    // We don't need to do anything if onDragOver handled it, 
+    // We don't need to do anything if onDragOver handled it,
     // but onDragEnd is good for the "final" commit if we were using local state.
     // Since we are using global state, onDragOver already mutated it.
     // But just in case:
@@ -98,24 +107,17 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
     <div
       id={section.id}
       className={cn(
-        "mb-12 print:mb-8 print:break-inside-avoid relative",
-        isExporting && "bg-[#282117] p-8 mb-0",
+        "mb-12 print:mb-8  print:break-inside-avoid relative",
+        isExporting && "bg-background p-8 mb-0",
       )}
     >
       {/* Section Header */}
-      <div className="flex items-center justify-between mb-6 border-b border-[var(--color-primary)]/30 pb-2">
-        <div className="flex flex-col font-title">
-          {isGeneratingImage && (
-            <img
-              src="/LOGOGROWTH.png"
-              alt="Growth Rockstar"
-              className="w-auto w-auto mb-2 opacity-80"
-            />
-          )}
+      <div className="flex items-center justify-between  mb-6 border-b border-[var(--color-primary)]/30 pb-2">
+        <div className="flex flex-col font-title ">
           <h2 className="text-2xl font-bold  text-[var(--color-primary)] flex items-center gap-3">
             <span
               className={cn(
-                "text-white/20 text-3xl print:text-black/50",
+                "text-black/90 text-3xl print:text-black/50",
                 isExporting && "text-[var(--color-primary)] opacity-50",
               )}
             >
@@ -124,14 +126,23 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
             {section.title}
           </h2>
         </div>
+        {isGeneratingImage && (
+          <img
+            src="/LOGOGROWTH.png"
+            alt="Growth Rockstar"
+            width={200}
+            className="opacity-80  "
+          />
+        )}
 
         <div className={cn("flex items-center gap-2", isExporting && "hidden")}>
           <Button
+            id="tour-share-button"
             variant="ghost"
             size="sm"
             onClick={handleShareImage}
             disabled={isGeneratingImage}
-            className="text-white/30 hover:text-[var(--color-primary)]"
+            className=" text-primary hover:text-[#d5454e]"
             title="Compartir Imagen"
           >
             {isGeneratingImage ? (
@@ -146,9 +157,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
             onClick={() => toggleSectionComplete(section.id)}
             className={cn(
               "print:hidden",
-              section.is_completed
-                ? "text-[var(--color-primary)]"
-                : "text-white/30",
+              section.is_completed ? "text-[#d5454e]" : "text-primary",
             )}
           >
             {section.is_completed ? (
@@ -203,7 +212,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
 
       <div
         className={cn(
-          "tour-add-widgets mt-4 flex flex-wrap gap-2 justify-center opacity-50 hover:opacity-100 transition-opacity print:hidden",
+          " mt-4 flex flex-wrap gap-2 justify-center   transition-opacity print:hidden",
           isExporting && "hidden",
         )}
       >

@@ -49,11 +49,16 @@ interface CanvasStore extends ProjectState {
 
   // Sections
   fetchSections: () => Promise<void>;
+
+  // View State
+  focusedSectionId: string | null;
+  setFocusedSectionId: (id: string | null) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>()(
   (set, get) => ({
     isExporting: false,
+
     setIsExporting: (isExporting) => set({ isExporting }),
 
     // Sync State
@@ -71,7 +76,7 @@ export const useCanvasStore = create<CanvasStore>()(
 
     saveCanvas: async () => {
       const state = get();
-      
+
       // Debounced Save Logic
       clearTimeout(saveTimeout);
 
@@ -89,7 +94,7 @@ export const useCanvasStore = create<CanvasStore>()(
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              canvasId: (state.meta as any).dbId, 
+              canvasId: (state.meta as any).dbId,
               title: state.project.title,
               data: dataToSave
             })
@@ -103,7 +108,7 @@ export const useCanvasStore = create<CanvasStore>()(
           if (!response.ok) throw new Error('Failed to save');
 
           const result = await response.json();
-          
+
           // Update state with the returned ID so future saves update this record
           if (result.canvas && result.canvas.id) {
             set((prev) => ({
@@ -432,6 +437,10 @@ export const useCanvasStore = create<CanvasStore>()(
         console.error("Error loading sections:", error);
       }
     },
+
+    focusedSectionId: null,
+    setFocusedSectionId: (id) => set({ focusedSectionId: id }),
   }),
 
 );
+

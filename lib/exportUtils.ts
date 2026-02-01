@@ -36,7 +36,7 @@ export const generateSectionImage = async (sectionId: string, sectionTitle: stri
   try {
     const canvas = await html2canvas(element, {
       scale: 2, // Retain high quality
-      backgroundColor: '#282117',
+      backgroundColor: '#f2f2f2',
       useCORS: true,
       logging: false,
       width: element.scrollWidth,
@@ -64,12 +64,12 @@ export const generateSectionImage = async (sectionId: string, sectionTitle: stri
         downloadFile(blob, filename);
         // Maybe copy text to clipboard if share failed?
         if (customText) {
-            try {
-                await navigator.clipboard.writeText(customText);
-                alert("Imagen descargada. Texto copiado al portapapeles (WhatsApp Web no soporta envío directo de imagen + texto desde web).");
-            } catch (e) {
-                // Ignore
-            }
+          try {
+            await navigator.clipboard.writeText(customText);
+            alert("Imagen descargada. Texto copiado al portapapeles (WhatsApp Web no soporta envío directo de imagen + texto desde web).");
+          } catch (e) {
+            // Ignore
+          }
         }
       }
     }, 'image/png');

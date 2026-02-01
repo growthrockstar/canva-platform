@@ -2,13 +2,16 @@
 
 import React, { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import type { Widget } from '@/types/canvas';
-import { useCanvasStore } from '@/lib/store/useCanvasStore';
-import { Button } from '@/components/ui/Button';
+import type { Widget } from "@/types/canvas";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { Button } from "@/components/ui/Button";
 import { WidgetRenderer } from "../WidgetRenderer";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { SortableWidget } from "../SortableWidget";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 import { useDroppable } from "@dnd-kit/core";
 
 interface AccordionBlockProps {
@@ -27,9 +30,9 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
   const { setNodeRef: setDroppableRef } = useDroppable({
     id: `container-${widget.id}`,
     data: {
-      type: 'container',
-      parentId: widget.id
-    }
+      type: "container",
+      parentId: widget.id,
+    },
   });
 
   const toggleOpen = () => setIsOpen(!isOpen);
@@ -43,12 +46,12 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
         shouldShow
           ? "border-[var(--color-primary)] bg-black/20 overflow-visible"
           : "border-white/20 hover:border-white/40 overflow-hidden",
-        isExporting && "overflow-visible" // Prevent clipping during export
+        isExporting && "overflow-visible", // Prevent clipping during export
       )}
     >
       <div
         className={cn(
-          "flex items-center p-3 bg-white/5 cursor-pointer select-none print:hidden",
+          "flex items-center p-3 bg-[#eeff8d]/80 cursor-pointer select-none print:hidden",
         )}
         onClick={toggleOpen}
       >
@@ -86,7 +89,7 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
         <div
           ref={setDroppableRef}
           className={cn(
-            "pr-4 pl-6 pt-4 pb-4 border-t border-white/10 space-y-4 duration-200 print:block print:border-none print:p-0 min-h-[60px]", // Added min-h for drop target
+            "pr-12  pt-4 pb-4 border-t bg-background space-y-4 duration-200 print:block print:border-none print:p-0 min-h-[60px]", // Added min-h for drop target
             !isExporting && "animate-in slide-in-from-top-2",
             shouldShow ? "block" : "hidden print:block",
           )}
@@ -114,7 +117,7 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
               isExporting && "hidden",
             )}
           >
-            <span className="text-xs text-white/30 uppercase tracking-widest my-auto mr-2">
+            <span className="text-xs  uppercase tracking-widest my-auto mr-2">
               Agregar al deslizable:
             </span>
 

@@ -17,6 +17,7 @@ export const Canvas: React.FC = () => {
     syncError,
     loadCanvas,
     fetchSections,
+    focusedSectionId,
   } = useCanvasStore();
   const cols = meta.grid_columns || 1;
 
@@ -29,18 +30,22 @@ export const Canvas: React.FC = () => {
     }
   }, [encryptionPassword]);
 
+  // Filter sections if focused
+  const visibleSections = focusedSectionId
+    ? syllabus_sections.filter((s) => s.id === focusedSectionId)
+    : syllabus_sections;
+
   return (
     <div
       id="main-canvas-container"
       className={cn(
-        "mx-auto py-12 px-6 pb-32 bg-[var(--color-background)] transition-all duration-300",
-        cols === 1 ? "max-w-4xl" : "max-w-[1400px]", // Wider container for grid
-        isExporting && "pb-12 max-w-4xl", // Enforce width on export for consistency? Or allow grid export? Let's default to standard width for PDF unless grid is desired.
+        "relative w-full min-h-screen bg-[var(--color-background)] transition-all duration-300 p-8",
+        // Remove max-width constraints to fill the center column
       )}
     >
-      {/* Sync Status Indicator */}
+      {/* Sync Status Indicator - Positioned Absolute in Top Right of Canvas Area */}
       {!isExporting && isAuthenticated && (
-        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-zinc-900 border border-zinc-800 p-2 rounded-lg text-xs shadow-xl">
+        <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2 bg-white/50 border border-[#010101]/10 p-2 rounded-full text-[10px] shadow-sm backdrop-blur-sm">
           <>
             <div
               className={cn(
@@ -52,20 +57,20 @@ export const Canvas: React.FC = () => {
                     : "bg-green-500",
               )}
             />
-            <span className="text-zinc-400">
+            <span className="text-[#010101]/60 font-medium">
               {isSyncing
-                ? "Syncing..."
+                ? "SYNCING"
                 : syncError
-                  ? "Sync Error"
+                  ? "ERROR"
                   : lastSyncedAt
-                    ? "Saved"
-                    : "Local"}
+                    ? "SAVED"
+                    : "LOCAL"}
             </span>
           </>
         </div>
       )}
 
-      {/* Export Header with Logo */}
+      {/* Export Header with Logo - Keep for PDF exports */}
       <div className={cn("hidden mb-8 text-center", isExporting && "block")}>
         <img
           src="/LOGOGROWTH.png"
@@ -82,34 +87,30 @@ export const Canvas: React.FC = () => {
 
       <div
         className={cn(
-          "grid gap-8",
+          "grid gap-8 pb-20", // Added padding bottom for scrolling
           isExporting
             ? "grid-cols-1"
             : {
-                // Force 1 column for PDF export usually safer, but user might want grid. Let's respect user choice if they asked for grid. BUT PDF usually implies A4 portrait sequence.
-                "grid-cols-1": cols === 1,
-                "grid-cols-1 md:grid-cols-2": cols === 2,
-                "grid-cols-1 md:grid-cols-2 lg:grid-cols-3": cols === 3,
+                "grid-cols-1": cols === 1 || focusedSectionId, // Force 1 col if focused
+                "grid-cols-1 md:grid-cols-2": cols === 2 && !focusedSectionId,
+                "grid-cols-1 md:grid-cols-2 lg:grid-cols-3":
+                  cols === 3 && !focusedSectionId,
               },
         )}
       >
-        {syllabus_sections.map((section, index) => (
+        {visibleSections.map((section, index) => (
           <div key={section.id} className="min-w-0">
-            {" "}
             {/* Wrapper to prevent grid blowout */}
-            <Section section={section} index={index} />
+            {/* We need to pass the original index if we are filtering, 
+                so the number remains correct (e.g. Section 5 should show "05" not "01") 
+            */}
+            <Section
+              section={section}
+              index={syllabus_sections.findIndex((s) => s.id === section.id)}
+            />
           </div>
         ))}
       </div>
-
-      <footer
-        className={cn(
-          "text-center text-white/20 mt-20",
-          isExporting ? "hidden" : "print:hidden",
-        )}
-      >
-        <p className="text-sm">Growth Rockstar Canvas</p>
-      </footer>
     </div>
   );
 };

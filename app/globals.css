@@ -4,12 +4,11 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter-v);
-  --font-title: var(--font-oswald-v);
-  --background: #ffffff;
-  --foreground: #171717;
-  --color-primary: #fa0145;
-  --color-background: #282117;
-  --color-text: #e8ddca;
+  --font-title: var(--font-archivo-v);
+  --color-primary: #010101;
+  --color-cta: #eeff8d;
+  --color-background: #f2f2f2;
+  --color-text: #010101;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,7 +44,7 @@ h6 {
   background: var(--color-background);
 }
 ::-webkit-scrollbar-thumb {
-  background: #443c33;
+  background: #eeff8d;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {

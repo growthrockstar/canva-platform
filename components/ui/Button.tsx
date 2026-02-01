@@ -16,11 +16,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           {
             "bg-[var(--color-primary)] text-white hover:bg-red-600":
               variant === "primary",
-            "bg-[#443c33] text-[var(--color-text)] hover:bg-[#5a5044]":
+            "bg-[#eeff8d]/80 text-[var(--color-text)] opacity-50 hover:opacity-100 hover:bg-[#eeff8d]":
               variant === "secondary",
             "border-2 border-[var(--color-text)] text-[var(--color-text)] hover:bg-[var(--color-text)] hover:text-[var(--color-background)]":
               variant === "outline",
-            "hover:bg-white/10 text-[var(--color-text)]": variant === "ghost",
+            "hover:bg-white/10 hover:underline transition-all text-[var(--color-text)]":
+              variant === "ghost",
             "h-8 px-3 text-xs": size === "sm",
             "h-10 px-4 py-2": size === "md",
             "h-12 px-6 text-lg": size === "lg",

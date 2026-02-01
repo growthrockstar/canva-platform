@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { Plus, Trash2 } from 'lucide-react';
-import type { Widget } from '@/types/canvas';
-import { Button } from '@/components/ui/Button';
-import { sheetEngine, type FunctionMetadata } from '@/lib/sheetEngine';
-import { useCanvasStore } from '@/lib/store/useCanvasStore';
+import React, { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
+import { Plus, Trash2 } from "lucide-react";
+import type { Widget } from "@/types/canvas";
+import { Button } from "@/components/ui/Button";
+import { sheetEngine, type FunctionMetadata } from "@/lib/sheetEngine";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
 
 interface TableBlockProps {
   widget: Widget;
@@ -15,13 +15,22 @@ interface TableBlockProps {
 
 export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
   const { isExporting } = useCanvasStore();
-  const rawData = widget.tableData || [['Header 1', 'Header 2'], ['Row 1', 'Row 2']];
-  const [editingCell, setEditingCell] = useState<{ r: number, c: number } | null>(null);
-  const [editingValue, setEditingValue] = useState('');
+  const rawData = widget.tableData || [
+    ["Header 1", "Header 2"],
+    ["Row 1", "Row 2"],
+  ];
+  const [editingCell, setEditingCell] = useState<{
+    r: number;
+    c: number;
+  } | null>(null);
+  const [editingValue, setEditingValue] = useState("");
 
   // Range Selection State
   const [isDragging, setIsDragging] = useState(false);
-  const [selectionStart, setSelectionStart] = useState<{ r: number, c: number } | null>(null);
+  const [selectionStart, setSelectionStart] = useState<{
+    r: number;
+    c: number;
+  } | null>(null);
   // We need to track where in the text string the reference started to replace it correctly
   const selectionRefIndex = useRef<number | null>(null);
 
@@ -31,8 +40,11 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
   const [suggestions, setSuggestions] = useState<FunctionMetadata[]>([]);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filterText, setFilterText] = useState('');
-  const [popoverPosition, setPopoverPosition] = useState<{ top: number, left: number } | null>(null);
+  const [filterText, setFilterText] = useState("");
+  const [popoverPosition, setPopoverPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   // Ref for input elements to manage focus
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -52,9 +64,11 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
   // Auto-scroll to selected suggestion
   useEffect(() => {
     if (showSuggestions && suggestionsRef.current) {
-      const selectedElement = suggestionsRef.current.children[selectedSuggestionIndex] as HTMLElement;
+      const selectedElement = suggestionsRef.current.children[
+        selectedSuggestionIndex
+      ] as HTMLElement;
       if (selectedElement) {
-        selectedElement.scrollIntoView({ block: 'nearest' });
+        selectedElement.scrollIntoView({ block: "nearest" });
       }
     }
   }, [selectedSuggestionIndex, showSuggestions]);
@@ -65,7 +79,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
       const rect = input.getBoundingClientRect();
       setPopoverPosition({
         top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX
+        left: rect.left + window.scrollX,
       });
     }
   };
@@ -78,10 +92,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
       setEditingValue(rawData[r][c]); // Initialize local state
       setShowSuggestions(false);
     }
-  }
-
-
-
+  };
 
   const coordsToAddress = (r: number, c: number) => {
     const colChar = String.fromCharCode(65 + c);
@@ -89,7 +100,10 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
     return `${colChar}${rowNum}`;
   };
 
-  const getRangeString = (start: { r: number, c: number }, end: { r: number, c: number }) => {
+  const getRangeString = (
+    start: { r: number; c: number },
+    end: { r: number; c: number },
+  ) => {
     const startAddr = coordsToAddress(start.r, start.c);
     if (start.r === end.r && start.c === end.c) return startAddr;
     const endAddr = coordsToAddress(end.r, end.c);
@@ -100,14 +114,13 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
     return `${startAddr}:${endAddr}`;
   };
 
-
   // Handle click to select range (if editing another cell with formula)
   const handleMouseDown = (e: React.MouseEvent, r: number, c: number) => {
     if (editingCell && (editingCell.r !== r || editingCell.c !== c)) {
       const currentVal = rawData[editingCell.r][editingCell.c];
 
       // If we are editing a formula
-      if (currentVal.startsWith('=')) {
+      if (currentVal.startsWith("=")) {
         e.preventDefault(); // Prevent focus loss on editing cell
 
         // Start selection
@@ -164,7 +177,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
       // Replace the part of string from selectionRefIndex to end
       if (selectionRefIndex.current !== null) {
         // If we are in the middle of dragging, we construct from base.
-        // Note: handleMouseDown appended to `editingValue`. 
+        // Note: handleMouseDown appended to `editingValue`.
         // But here we reconstruct from `baseVal` (which doesn't have the first click address yet! wait).
         // handleMouseDown: `currentVal = rawData...`. Then `newVal = currentVal + address`.
         // If we drag, we want `currentVal + newRange`.
@@ -201,8 +214,8 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
         handleMouseUp();
       }
     };
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+    return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
   }, [isDragging]);
 
   const handleKeyDown = (e: React.KeyboardEvent, r: number, c: number) => {
@@ -210,48 +223,49 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
     e.stopPropagation();
 
     if (showSuggestions) {
-      if (e.key === 'ArrowDown') {
+      if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => (prev + 1) % suggestions.length);
-      } else if (e.key === 'ArrowUp') {
+        setSelectedSuggestionIndex((prev) => (prev + 1) % suggestions.length);
+      } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
-      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        setSelectedSuggestionIndex(
+          (prev) => (prev - 1 + suggestions.length) % suggestions.length,
+        );
+      } else if (e.key === "Enter" || e.key === "Tab") {
         e.preventDefault();
         applySuggestion(suggestions[selectedSuggestionIndex].name);
-      } else if (e.key === 'Escape') {
+      } else if (e.key === "Escape") {
         setShowSuggestions(false);
       }
       return;
     }
 
-    if (e.key === 'ArrowRight') {
+    if (e.key === "ArrowRight") {
       // e.preventDefault(); // Default behavior allows cursor movement inside text
-    } else if (e.key === 'ArrowLeft') {
+    } else if (e.key === "ArrowLeft") {
       // e.preventDefault();
-    } else if (e.key === 'ArrowDown') {
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
       focusCell(r + 1, c);
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       focusCell(r - 1, c);
-    } else if (e.key === 'Enter') {
+    } else if (e.key === "Enter") {
       e.preventDefault();
       commitEditing();
       focusCell(r + 1, c);
     }
-  }
-
+  };
 
   const handleChange = (r: number, c: number, value: string) => {
     setEditingValue(value);
 
     // Basic hint logic: if starts with = and typing letters
-    if (value.startsWith('=')) {
+    if (value.startsWith("=")) {
       const match = value.match(/([A-Z]+)$/i);
       if (match) {
         const text = match[1].toUpperCase();
-        const filtered = functionMeta.filter(f => f.name.startsWith(text));
+        const filtered = functionMeta.filter((f) => f.name.startsWith(text));
         if (filtered.length > 0) {
           setSuggestions(filtered);
           setFilterText(text);
@@ -270,7 +284,10 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
     // const { r, c } = editingCell;
     // Use editingValue instead of rawData since we might have typed more
     const currentVal = editingValue;
-    const newVal = currentVal.substring(0, currentVal.length - filterText.length) + funcName + '(';
+    const newVal =
+      currentVal.substring(0, currentVal.length - filterText.length) +
+      funcName +
+      "(";
     setEditingValue(newVal);
     // Focus back ensures we keep editing
     const key = `${editingCell.r}-${editingCell.c}`;
@@ -282,12 +299,12 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
   const commitEditing = () => {
     if (editingCell) {
       updateCell(editingCell.r, editingCell.c, editingValue);
-      // We do NOT plain clear editingCell here if we are just moving focus, 
+      // We do NOT plain clear editingCell here if we are just moving focus,
       // but typically commit implies we are done with THIS cell or moving to another.
       // The movement logic (focusCell) sets new editingCell.
       // So this just persists.
     }
-  }
+  };
 
   const updateCell = (rowIndex: number, colIndex: number, value: string) => {
     const newData = [...rawData];
@@ -298,12 +315,12 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
 
   const addRow = () => {
     const cols = rawData[0].length;
-    const newRow = Array(cols).fill('');
+    const newRow = Array(cols).fill("");
     onUpdate({ tableData: [...rawData, newRow] });
   };
 
   const addColumn = () => {
-    const newData = rawData.map(row => [...row, '']);
+    const newData = rawData.map((row) => [...row, ""]);
     onUpdate({ tableData: newData });
   };
 
@@ -311,29 +328,31 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
     if (rawData.length <= 1) return;
     const newData = rawData.filter((_, i) => i !== index);
     onUpdate({ tableData: newData });
-  }
+  };
 
   const removeColumn = (index: number) => {
     if (rawData[0].length <= 1) return;
-    const newData = rawData.map(row => row.filter((_, i) => i !== index));
+    const newData = rawData.map((row) => row.filter((_, i) => i !== index));
     onUpdate({ tableData: newData });
-  }
+  };
 
   const getCellDisplayValue = (r: number, c: number, rawValue: string) => {
     if (editingCell?.r === r && editingCell?.c === c) {
       return editingValue;
     }
     return sheetEngine.getComputedValue(widget.id, r, c) || rawValue;
-  }
+  };
 
   return (
-    <div className={`relative ${isExporting ? 'overflow-visible w-max min-w-full' : 'overflow-x-auto'}`}>
+    <div
+      className={`relative ${isExporting ? "overflow-visible w-max min-w-full" : "overflow-x-auto"}`}
+    >
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-2 w-8 bg-black/20 text-xs text-white/30 border border-white/10"></th>
+            <th className="p-2 w-8 bg-[#eeff8d] text-xs  border "></th>
             {rawData[0].map((_, i) => (
-              <th key={i} className="p-2 bg-black/20 text-xs text-white/50 border border-white/10 font-mono">
+              <th key={i} className="p-2 bg-[#eeff8d] text-xs  border ">
                 {String.fromCharCode(65 + i)}
               </th>
             ))}
@@ -343,26 +362,40 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
         <tbody>
           {rawData.map((row, rowIndex) => (
             <tr key={rowIndex} className="group/row">
-              <td className="p-2 bg-black/20 text-xs text-white/50 border border-white/10 font-mono text-center">
+              <td className="p-2 bg-[#eeff8d] text-xs border text-center">
                 {rowIndex + 1}
               </td>
               {row.map((cell, colIndex) => (
-                <td key={colIndex} className="border border-white/10 p-0 relative group/cell min-w-[100px]">
+                <td
+                  key={colIndex}
+                  className="border border p-0 relative group/cell min-w-[100px]"
+                >
                   {isExporting ? (
-                    <div className={`w-full h-full p-2 bg-transparent ${rowIndex === 0 ? 'font-bold text-[var(--color-primary)]' : 'text-white/80'}`}>
+                    <div
+                      className={`w-full h-full p-2 bg-transparent ${rowIndex === 0 ? "font-bold text-[var(--color-primary)]" : "text-white/80"}`}
+                    >
                       {getCellDisplayValue(rowIndex, colIndex, cell)}
                     </div>
                   ) : (
                     <input
-                      ref={el => { inputRefs.current[`${rowIndex}-${colIndex}`] = el }}
+                      ref={(el) => {
+                        inputRefs.current[`${rowIndex}-${colIndex}`] = el;
+                      }}
                       value={getCellDisplayValue(rowIndex, colIndex, cell)}
-                      onChange={(e) => handleChange(rowIndex, colIndex, e.target.value)}
+                      onChange={(e) =>
+                        handleChange(rowIndex, colIndex, e.target.value)
+                      }
                       onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
-                      onMouseDown={(e) => handleMouseDown(e, rowIndex, colIndex)}
+                      onMouseDown={(e) =>
+                        handleMouseDown(e, rowIndex, colIndex)
+                      }
                       onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
                       onBlur={() => {
                         // Commit on blur
-                        if (editingCell?.r === rowIndex && editingCell?.c === colIndex) {
+                        if (
+                          editingCell?.r === rowIndex &&
+                          editingCell?.c === colIndex
+                        ) {
                           commitEditing();
                         }
 
@@ -373,8 +406,8 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                           }
                         }, 150);
                       }}
-                      className={`w-full h-full p-2 bg-transparent border-none focus:outline-none 
-                                        ${rowIndex === 0 ? 'font-bold text-[var(--color-primary)]' : 'text-white/80'}
+                      className={`w-full h-full p-2 bg-transparent  focus:outline-none 
+                                        ${rowIndex === 0 ? "font-bold text-[var(--color-primary)]" : ""}
                                         focus:bg-white/10 transition-colors
                                 `}
                     />
@@ -414,26 +447,30 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
         </tbody>
       </table>
 
-      {
-        showSuggestions && popoverPosition && createPortal(
+      {showSuggestions &&
+        popoverPosition &&
+        createPortal(
           <div
             ref={suggestionsRef}
             className="fixed z-[9999] bg-gray-900 border border-white/20 rounded shadow-lg max-h-48 overflow-y-auto w-48 font-sans"
             style={{
               top: popoverPosition.top - window.scrollY, // Fixed position is relative to viewport, so we need calculated client coordinates
-              left: popoverPosition.left - window.scrollX
+              left: popoverPosition.left - window.scrollX,
             }}
           >
             {suggestions.map((s, i) => (
               <div
                 key={s.name}
-                className={`px-3 py-2 cursor-pointer text-sm border-b border-white/5 last:border-0 ${i === selectedSuggestionIndex ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-white/10'}`}
-                onMouseDown={(e) => { e.preventDefault(); applySuggestion(s.name); }}
+                className={`px-3 py-2 cursor-pointer text-sm border-b border-white/5 last:border-0 ${i === selectedSuggestionIndex ? "bg-blue-600 text-white" : "text-gray-300 hover:bg-white/10"}`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  applySuggestion(s.name);
+                }}
               >
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="font-bold text-white">{s.name}</span>
                   <span className="text-xs text-white/50 font-mono">
-                    ({s.parameters.join(', ')})
+                    ({s.parameters.join(", ")})
                   </span>
                 </div>
                 {s.description && (
@@ -444,22 +481,19 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
               </div>
             ))}
           </div>,
-          document.body
-        )
-      }
+          document.body,
+        )}
 
-      {
-        !isExporting && (
-          <div className="flex gap-2 mt-2">
-            <Button variant="secondary" size="sm" onClick={addRow}>
-              <Plus className="w-4 h-4 mr-2" /> Agregar Fila
-            </Button>
-            <Button variant="secondary" size="sm" onClick={addColumn}>
-              <Plus className="w-4 h-4 mr-2" /> Agregar Columna
-            </Button>
-          </div>
-        )
-      }
-    </div >
+      {!isExporting && (
+        <div className="flex gap-2 mt-2">
+          <Button variant="ghost" size="sm" onClick={addRow}>
+            <Plus className="w-4 h-4 mr-2" /> Agregar Fila
+          </Button>
+          <Button variant="ghost" size="sm" onClick={addColumn}>
+            <Plus className="w-4 h-4 mr-2" /> Agregar Columna
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };

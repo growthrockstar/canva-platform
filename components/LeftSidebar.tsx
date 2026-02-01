@@ -1,0 +1,187 @@
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { cn } from "@/lib/utils";
+import { RotateCcw, FileJson, Loader2, Maximize2 } from "lucide-react";
+import { generateFullPDF } from "@/lib/exportUtils";
+import { Button } from "@/components/ui/Button";
+
+export const LeftSidebar: React.FC = () => {
+  const {
+    project,
+    setProjectTitle,
+    setStudentName,
+    syllabus_sections,
+    focusedSectionId,
+    setFocusedSectionId,
+    setIsExporting,
+    resetProject,
+  } = useCanvasStore();
+
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  // PDF Export Logic
+  const handlePDFExport = async (scale: number) => {
+    setIsGeneratingPDF(true);
+    setIsExporting(true);
+    setTimeout(async () => {
+      await generateFullPDF(project.title, scale);
+      setIsExporting(false);
+      setIsGeneratingPDF(false);
+    }, 1000);
+  };
+
+  return (
+    <aside className="w-[320px] bg-[#f2f2f2] border-r font-title border-[#010101]/10 h-screen sticky top-0 flex flex-col p-6 hidden lg:flex font-sans overflow-y-auto custom-scrollbar">
+      {/* Branding */}
+      <div className="flex items-center gap-3 mb-10 shrink-0">
+        <Image
+          src="/MONOGRAMA.png"
+          height={40}
+          width={40}
+          alt="Growth Rockstar Logo"
+          className="object-contain"
+        />
+        <div className="flex flex-col">
+          <span className="font-bold text-[#010101] tracking-tight leading-none">
+            GROWTH ROCKSTAR
+          </span>
+          <span className="text-[#010101] text-xs tracking-widest opacity-60">
+            CANVAS
+          </span>
+        </div>
+      </div>
+
+      {/* Project Info */}
+      <div className="space-y-6 mb-8 shrink-0">
+        <div className="space-y-2">
+          <label className="text-[10px] uppercase tracking-widest text-[#010101]/50 font-bold">
+            Proyecto
+          </label>
+          <input
+            id="tour-project-title"
+            value={project.title}
+            onChange={(e) => setProjectTitle(e.target.value)}
+            className="w-full bg-transparent text-xl font-bold text-[#010101] placeholder-[#010101]/30 focus:outline-none focus:ring-0 border-none p-0 font-title"
+            placeholder="Nombre del Proyecto"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] uppercase tracking-widest text-[#010101]/50 font-bold">
+            Estudiante
+          </label>
+          <input
+            id="tour-student-name"
+            value={project.student_name}
+            onChange={(e) => setStudentName(e.target.value)}
+            className="w-full bg-transparent text-sm text-[#010101] placeholder-[#010101]/30 focus:outline-none focus:ring-0 border-b border-[#010101]/10 pb-1"
+            placeholder="Tu Nombre"
+          />
+        </div>
+      </div>
+
+      <div className="w-full h-px bg-[#010101]/5 mb-8 shrink-0" />
+
+      {/* Navigation Controls */}
+      <div className="space-y-6 flex-1 flex flex-col min-h-0">
+        {/* View All Button */}
+        <div id="tour-expand-view" className="shrink-0">
+          <button
+            onClick={() => setFocusedSectionId(null)}
+            className={cn(
+              "w-full flex items-center justify-start gap-3 p-3 rounded-lg transition-all duration-200 border",
+              !focusedSectionId
+                ? "bg-[#010101] text-white border-[#010101]"
+                : "bg-white text-[#010101] border-[#010101]/10 hover:border-[#010101]/30",
+            )}
+          >
+            <Maximize2 className="w-5 h-5" />
+            <span className="font-medium text-sm">Ampliar Vista</span>
+          </button>
+        </div>
+
+        {/* Sections Grid */}
+        <div
+          className="flex-1 overflow-y-auto px-1 custom-scrollbar min-h-[150px]"
+          id="tour-section-grid"
+        >
+          <div className="flex items-center justify-between mb-4 sticky top-0 bg-[#f2f2f2] z-10 py-1">
+            <span className="text-[10px] uppercase tracking-widest text-[#010101]/50 font-bold">
+              Secciones
+            </span>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 pb-2">
+            {syllabus_sections.map((section, index) => {
+              const isCompleted = section.is_completed;
+              const isFocused = focusedSectionId === section.id;
+
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => setFocusedSectionId(section.id)}
+                  title={section.title}
+                  className={cn(
+                    "aspect-square rounded-md flex items-center justify-center font-title font-bold text-lg transition-all duration-200 border",
+                    isCompleted
+                      ? "bg-[#eeff8d] text-[#010101] border-[#eeff8d]"
+                      : "bg-white text-[#010101] border-[#010101]/10",
+                    isFocused &&
+                      !isCompleted &&
+                      "ring-2 ring-[#010101] ring-offset-2",
+                    isFocused &&
+                      isCompleted &&
+                      "ring-2 ring-[#010101] ring-offset-2",
+                    !isCompleted && "hover:border-[#010101]/30",
+                  )}
+                >
+                  {index + 1}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tools */}
+        <div
+          className="pt-6 border-t border-[#010101]/10 space-y-3 shrink-0"
+          id="tour-tools"
+        >
+          <span className="text-[10px] uppercase tracking-widest text-[#010101]/50 font-bold block mb-2">
+            Herramientas
+          </span>
+
+          <Button
+            variant="primary"
+            className="w-full justify-start bg-[#010101] text-white hover:bg-[#010101]/80"
+            onClick={() => handlePDFExport(2)}
+            disabled={isGeneratingPDF}
+          >
+            {isGeneratingPDF ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <FileJson className="w-4 h-4 mr-2" />
+            )}
+            <span>Exportar PDF</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-[#010101]  hover:bg-[#eeff8d]/50"
+            onClick={resetProject}
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            <span>Reset</span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-8 text-[10px] text-[#010101]/30 shrink-0">
+        &copy; {new Date().getFullYear()} Growth Rockstar
+      </div>
+    </aside>
+  );
+};
