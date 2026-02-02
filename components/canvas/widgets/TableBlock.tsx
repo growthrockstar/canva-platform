@@ -350,13 +350,12 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-2 w-8 bg-[#eeff8d] text-xs  border "></th>
+            <th className="p-2 w-8 bg-[#4b4f37] text-xs  border "></th>
             {rawData[0].map((_, i) => (
               <th key={i} className="p-2 bg-[#eeff8d] text-xs  border ">
                 {String.fromCharCode(65 + i)}
               </th>
             ))}
-            <th className="w-10"></th>
           </tr>
         </thead>
         <tbody>
@@ -485,11 +484,11 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
         )}
 
       {!isExporting && (
-        <div className="flex gap-2 mt-2">
-          <Button variant="ghost" size="sm" onClick={addRow}>
+        <div className="flex gap-2 justify-end mt-2 mr-12">
+          <Button variant="outline" size="sm" onClick={addRow}>
             <Plus className="w-4 h-4 mr-2" /> Agregar Fila
           </Button>
-          <Button variant="ghost" size="sm" onClick={addColumn}>
+          <Button variant="outline" size="sm" onClick={addColumn}>
             <Plus className="w-4 h-4 mr-2" /> Agregar Columna
           </Button>
         </div>

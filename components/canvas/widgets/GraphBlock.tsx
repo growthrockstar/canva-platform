@@ -29,14 +29,7 @@ interface GraphBlockProps {
   onUpdate: (data: Partial<Widget>) => void;
 }
 
-const COLORS = [
-  "#eeff8d",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884d8",
-  "#82ca9d",
-];
+const COLORS = ["#010101", "#d5454e", "#a48562", "#414242"];
 
 export const GraphBlock: React.FC<GraphBlockProps> = ({ widget, onUpdate }) => {
   const { syllabus_sections } = useCanvasStore();
@@ -127,7 +120,7 @@ export const GraphBlock: React.FC<GraphBlockProps> = ({ widget, onUpdate }) => {
 
   if (isConfiguring || !widget.graphConfig) {
     return (
-      <div className="p-4 bg-gray-900/50 rounded-lg border border-white/10">
+      <div className="p-4  rounded-lg border text-black border-black bg-cta">
         <h3 className="text-lg font-semibold mb-4 text-white">
           Configurar Gráfico
         </h3>
@@ -184,12 +177,11 @@ const renderChart = (
           <YAxis stroke="#111" />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1f2937",
-              border: "none",
-              color: "#fff",
+              backgroundColor: "#eeff8d",
+              color: "#000",
             }}
-            itemStyle={{ color: "#fff" }}
-            labelStyle={{ color: "#fff" }}
+            itemStyle={{ color: "#000" }}
+            labelStyle={{ color: "#000" }}
           />
           <Legend />
           {keys.map((key, i) => (
@@ -205,9 +197,8 @@ const renderChart = (
           <YAxis stroke="#888" />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1f2937",
-              border: "none",
-              color: "#fff",
+              backgroundColor: "#eeff8d",
+              color: "#000",
             }}
           />
           <Legend />
@@ -230,9 +221,8 @@ const renderChart = (
           <YAxis stroke="#888" />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1f2937",
-              border: "none",
-              color: "#fff",
+              backgroundColor: "#eeff8d",
+              color: "#000",
             }}
           />
           <Legend />
@@ -261,21 +251,20 @@ const renderChart = (
             cy="50%"
             outerRadius={100}
             fill="#8884d8"
-            label={{ fill: "white", fontSize: 12 }}
+            label={{ fill: "black", fontSize: 12 }}
           >
             {data.map((_entry: any, index: number) => (
               <Cell
                 key={`cell-${index}`}
                 fill={COLORS[index % COLORS.length]}
-                stroke="#1f2937" // Match background or similar for spacing
+                stroke="#000" // Match background or similar for spacing
               />
             ))}
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1f2937",
-              border: "none",
-              color: "#fff",
+              backgroundColor: "#eeff8d",
+              color: "#000",
             }}
           />
           <Legend />
@@ -332,13 +321,13 @@ const ConfigForm = ({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-1">
+        <label className="block text-sm font-medium mb-1">
           Seleccionar Tabla
         </label>
         <select
           value={tableId}
           onChange={(e) => setTableId(e.target.value)}
-          className="w-full bg-black/20 border border-white/10 rounded p-2 text-white"
+          className="w-full bg-black/20 border border-white/10 rounded p-2 font-bold"
         >
           {availableTables.map((t: any) => (
             <option key={t.id} value={t.id}>
@@ -349,14 +338,14 @@ const ConfigForm = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-1">
+        <label className="block text-sm font-medium  mb-1">
           Tipo de Gráfico
         </label>
         <div className="flex gap-2">
           {["bar", "line", "area", "pie"].map((type) => (
             <Button
               key={type}
-              variant={chartType === type ? "primary" : "secondary"}
+              variant={chartType === type ? "outline" : "ghost"}
               onClick={() => setChartType(type as any)}
               size="sm"
             >
@@ -368,13 +357,13 @@ const ConfigForm = ({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1">
+          <label className="block text-sm font-medium  mb-1">
             Eje X (Etiquetas)
           </label>
           <select
             value={xAxisColumn}
             onChange={(e) => setXAxisColumn(Number(e.target.value))}
-            className="w-full bg-black/20 border border-white/10 rounded p-2 text-white"
+            className="w-full bg-black/20 border border-white/10 rounded p-2 font-bold"
           >
             {headers.map((h: string, i: number) => (
               <option key={i} value={i}>
@@ -384,15 +373,12 @@ const ConfigForm = ({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1">
+          <label className="block text-sm font-medium  mb-1">
             Datos (Series)
           </label>
           <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
             {headers.map((h: string, i: number) => (
-              <label
-                key={i}
-                className="flex items-center gap-2 text-sm text-gray-300"
-              >
+              <label key={i} className="flex items-center gap-2 text-sm ">
                 <input
                   type="checkbox"
                   checked={dataColumns.includes(i)}
