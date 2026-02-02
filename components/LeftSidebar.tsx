@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { cn } from "@/lib/utils";
 import {
@@ -11,11 +12,13 @@ import {
   Maximize2,
   Columns,
   Rows,
+  LogOut,
 } from "lucide-react";
 import { generateFullPDF } from "@/lib/exportUtils";
 import { Button } from "@/components/ui/Button";
 
 export const LeftSidebar: React.FC = () => {
+  const router = useRouter();
   const {
     project,
     setProjectTitle,
@@ -27,6 +30,7 @@ export const LeftSidebar: React.FC = () => {
     resetProject,
     setGridColumns,
     meta,
+    setIsAuthenticated,
   } = useCanvasStore();
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -42,6 +46,16 @@ export const LeftSidebar: React.FC = () => {
       setIsExporting(false);
       setIsGeneratingPDF(false);
     }, 1000);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setIsAuthenticated(false);
+      router.replace("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   return (
@@ -249,6 +263,15 @@ export const LeftSidebar: React.FC = () => {
           >
             <RotateCcw className="w-4 h-4 mr-2" />
             <span>Reset</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full justify-start  hover:text-red-500 hover:bg-red-50 mt-2"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            <span>Cerrar Sesión</span>
           </Button>
         </div>
       </div>
