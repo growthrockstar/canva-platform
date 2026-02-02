@@ -117,13 +117,16 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
   // Handle click to select range (if editing another cell with formula)
   const handleMouseDown = (e: React.MouseEvent, r: number, c: number) => {
     if (editingCell && (editingCell.r !== r || editingCell.c !== c)) {
-      const currentVal = rawData[editingCell.r][editingCell.c];
+      // Use editingValue if we are the active editor, otherwise fallback to rawData
+      // Actually, rawData is only updated on commit. So editingValue IS the source of truth for the active cell.
+      const currentVal = editingValue; 
 
       // If we are editing a formula
       if (currentVal.startsWith("=")) {
         e.preventDefault(); // Prevent focus loss on editing cell
 
         // Start selection
+
         setIsDragging(true);
         setSelectionStart({ r, c });
 
@@ -164,15 +167,12 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
 
   const handleMouseEnter = (r: number, c: number) => {
     if (isDragging && selectionStart && editingCell) {
-      // We need the base value from before the *current* range selection started.
-      // The rawData has the committed value (without ANY range if we started fresh, OR with previous chars).
-      // Actually, we shouldn't use rawData[editingCell.r][editingCell.c] if we already appended something in handleMouseDown?
-      // Wait, in handleMouseDown I did NOT commit to rawData. So rawData is clean (pre-selection).
-      // Perfect.
-      const baseVal = rawData[editingCell.r][editingCell.c];
+      // We need the base value. Since we are editing locally, use editingValue as source.
+      const baseVal = editingValue;
 
       // Calculate new range string
       const newRange = getRangeString(selectionStart, { r, c });
+
 
       // Replace the part of string from selectionRefIndex to end
       if (selectionRefIndex.current !== null) {
@@ -388,7 +388,12 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                       onMouseDown={(e) =>
                         handleMouseDown(e, rowIndex, colIndex)
                       }
-                      onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
+                      onFocus={() => {
+                        setEditingCell({ r: rowIndex, c: colIndex });
+                        setEditingValue(rawData[rowIndex][colIndex]);
+                        // Clear any pending selection/drag state just in case
+                        setIsDragging(false);
+                      }}
                       onBlur={() => {
                         // Commit on blur
                         if (
@@ -401,11 +406,19 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                         // Delay clearing editing cell to allow suggestion click to fire
                         setTimeout(() => {
                           if (!showSuggestions) {
-                            setEditingCell(null);
+                            setEditingCell((prev) => {
+                              // Only clear if we are still effectively "editing" the cell that blurred
+                              // If prev has changed (e.g. focused another cell), don't clear.
+                              if (prev?.r === rowIndex && prev?.c === colIndex) {
+                                return null;
+                              }
+                              return prev;
+                            });
                           }
                         }, 150);
                       }}
                       className={`w-full h-full p-2 bg-transparent  focus:outline-none 
+
                                         ${rowIndex === 0 ? "font-bold text-[var(--color-primary)]" : ""}
                                         focus:bg-white/10 transition-colors
                                 `}

@@ -135,7 +135,7 @@ export const GraphBlock: React.FC<GraphBlockProps> = ({ widget, onUpdate }) => {
   }
 
   return (
-    <div className="relative group p-4 border border-white/5 rounded-lg bg-white/5">
+    <div className="relative group  border border-white/5 rounded-lg bg-white/5">
       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex gap-2">
         <Button
           size="sm"

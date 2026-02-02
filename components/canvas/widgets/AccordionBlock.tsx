@@ -45,13 +45,13 @@ export const AccordionBlock: React.FC<AccordionBlockProps> = ({
         "border rounded transition-colors print:border-none print:overflow-visible",
         shouldShow
           ? "border-[var(--color-primary)] bg-black/20 overflow-visible"
-          : "border-white/20 hover:border-white/40 overflow-hidden",
+          : "border  overflow-hidden",
         isExporting && "overflow-visible", // Prevent clipping during export
       )}
     >
       <div
         className={cn(
-          "flex items-center p-3 bg-[#eeff8d]/80 cursor-pointer select-none print:hidden",
+          "flex items-center p-3  bg-[#eeff8d] cursor-pointer select-none print:hidden",
         )}
         onClick={toggleOpen}
       >

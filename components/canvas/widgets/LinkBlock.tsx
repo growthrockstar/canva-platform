@@ -530,7 +530,7 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({ widget, onUpdate }) => {
   };
 
   return (
-    <div className="w-full relative group bg-cta text-black border-black font-title border rounded-lg overflow-hidden  transition-colors">
+    <div className="w-full relative group  text-black border-black font-title border rounded-lg overflow-hidden  transition-colors">
       {isEditing ? (
         <div className="p-4 flex flex-col text-black gap-3">
           <p className="text-sm font-bold">Agregar Enlace</p>
