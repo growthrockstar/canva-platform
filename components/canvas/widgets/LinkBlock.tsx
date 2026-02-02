@@ -530,14 +530,15 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({ widget, onUpdate }) => {
   };
 
   return (
-    <div className="w-full relative group text-black border-black font-title border rounded-lg overflow-hidden  transition-colors">
+    <div className="w-full relative group bg-cta text-black border-black font-title border rounded-lg overflow-hidden  transition-colors">
       {isEditing ? (
-        <div className="p-4 flex flex-col text-white gap-3">
+        <div className="p-4 flex flex-col text-black gap-3">
+          <p className="text-sm font-bold">Agregar Enlace</p>
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="Paste URL here..."
-              className="flex-1 bg-black border border-white/10 rounded px-3 py-2 text-sm  placeholder-white/30 focus:outline-none focus:border-white/30"
+              className="flex-1 bg-background text-black border border-dashed rounded px-3 py-2 text-sm   placeholder-black/80 focus:outline-none focus:border-white/30"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               autoFocus
@@ -555,7 +556,7 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({ widget, onUpdate }) => {
           <input
             type="text"
             placeholder="Title (optional)"
-            className="w-full bg-black border border-white/10 rounded px-3 py-2 text-sm font-bold placeholder-white/30 focus:outline-none focus:border-white/30"
+            className="w-full bg-background border border-black/40 border-dashed rounded px-3 py-2 text-sm font-bold placeholder-black/80 focus:outline-none focus:border-black"
             value={titleInput}
             onChange={(e) => setTitleInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSave()}

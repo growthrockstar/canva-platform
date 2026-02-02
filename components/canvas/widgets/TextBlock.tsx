@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 interface TextBlockProps {
   widget: Widget;
   onUpdate: (data: Partial<Widget>) => void;
-  isEditing?: boolean;
 }
 
 export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
@@ -264,7 +263,7 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
       <div
         ref={contentRef}
         className={cn(
-          "min-h-[2em] p-2 outline-none focus:ring-1 focus:ring-[var(--color-primary)] rounded border border-transparent hover:border-white/10 transition-colors text-lg",
+          "min-h-[2em] p-2 outline-none  focus:ring-[var(--color-primary)] rounded border border-transparent focus:border-black border-black/40 border-dashed transition-colors text-lg",
           "empty:before:content-[attr(data-placeholder)] empty:before:text-white/30",
           "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5", // Add styles for lists
         )}

@@ -188,12 +188,12 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
           ) : null}
         </DragOverlay>
       </DndContext>
-      <p className="text-center text-xs">
+      <p className={cn("text-center text-xs", isExporting && "hidden")}>
         Selecciona una de estas opciones para agregar un bloque:
       </p>
       <div
         className={cn(
-          " mt-4 flex flex-wrap gap-2 justify-center   transition-opacity print:hidden",
+          " mt-4 flex flex-wrap gap-2 justify-center transition-opacity print:hidden",
           isExporting && "hidden",
         )}
       >

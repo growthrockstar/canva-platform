@@ -114,7 +114,7 @@ export const generateSectionImage = async (sectionId: string, sectionTitle: stri
   }
 };
 
-export const generateFullPDF = async (projectTitle: string, scale: number = 3) => {
+export const generateFullPDF = async (projectTitle: string, requestedScale: number = 2) => {
   // We target the main canvas container
   const element = document.getElementById('main-canvas-container');
   if (!element) {
@@ -124,22 +124,50 @@ export const generateFullPDF = async (projectTitle: string, scale: number = 3) =
 
   try {
     const rect = element.getBoundingClientRect();
+    const scrollHeight = element.scrollHeight;
+    
+    // Browser Canvas Safety Limits (approx 32,767px height usually, or area limits)
+    // We'll set a safe height limit of 25,000px to be conservative across browsers.
+    const MAX_CANVAS_HEIGHT = 25000;
+    const MAX_CANVAS_AREA = 10000 * 10000; // 100 megapixels roughly safe
+
+    // Calculate effective scale to avoid breaking the canvas
+    let scale = requestedScale;
+    
+    // Check Height Limit
+    if (scrollHeight * scale > MAX_CANVAS_HEIGHT) {
+        scale = MAX_CANVAS_HEIGHT / scrollHeight;
+        console.warn(`PDF Export: Auto-reducing scale from ${requestedScale} to ${scale.toFixed(2)} to fit browser canvas limits.`);
+    }
+
+    // Check Area Limit (Width * Height * Scale^2)
+    const estimatedArea = (rect.width * scale) * (scrollHeight * scale);
+    if (estimatedArea > MAX_CANVAS_AREA) {
+        const reductionFactor = Math.sqrt(MAX_CANVAS_AREA / estimatedArea);
+        scale = scale * reductionFactor;
+        console.warn(`PDF Export: Auto-reducing scale to ${scale.toFixed(2)} to fit area limits.`);
+    }
+
+    // Ensure scale is at least 1 unless content is absolutely massive
+    if (scale < 1) scale = 1;
+
     const canvas = await html2canvas(element, {
-      scale: scale, // Use provided scale
-      backgroundColor: '#f2f2f2', // Matches app background usually
+      scale: scale, 
+      backgroundColor: '#f2f2f2', 
       useCORS: true,
       logging: false,
       width: rect.width,
-      height: element.scrollHeight,
+      height: scrollHeight,
       windowWidth: rect.width,
-      windowHeight: element.scrollHeight,
+      windowHeight: scrollHeight,
       onclone: (clonedDoc) => {
         const clonedEl = clonedDoc.getElementById('main-canvas-container');
         if (clonedEl) {
-          clonedEl.style.width = `${rect.width}px`;
+           clonedEl.style.width = `${rect.width}px`;
         }
 
         // --- FIX: Handle Iframes (Maps, Embeds) for Full PDF ---
+
         const iframes = clonedDoc.querySelectorAll('iframe');
         iframes.forEach((iframe) => {
           const iframeRect = iframe.getBoundingClientRect();
@@ -200,7 +228,10 @@ export const generateFullPDF = async (projectTitle: string, scale: number = 3) =
     const file = new File([pdfBlob], filename, { type: 'application/pdf' });
 
     const shared = await shareFile(file, projectTitle, 'Mi Growth Rockstar Canvas Completo.');
-    if (!shared || !globalThis.matchMedia("(pointer: coarse)").matches) {
+    // Check for pointer type safely
+    const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    
+    if (!shared || !isMobile) {
       pdf.save(filename);
     }
 

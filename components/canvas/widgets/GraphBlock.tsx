@@ -394,11 +394,16 @@ const ConfigForm = ({
 
       <div className="flex justify-end gap-2 mt-4">
         {onCancel && (
-          <Button variant="ghost" onClick={onCancel}>
+          <Button variant="secondary" onClick={onCancel}>
             Cancelar
           </Button>
         )}
-        <Button onClick={handleSave}>Guardar Configuración</Button>
+        <Button
+          className=" justify-start bg-[#010101] text-white hover:bg-[#010101]/80"
+          onClick={handleSave}
+        >
+          Guardar Configuración
+        </Button>
       </div>
     </div>
   );
