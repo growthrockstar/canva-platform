@@ -4,7 +4,14 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import { cn } from "@/lib/utils";
-import { RotateCcw, FileJson, Loader2, Maximize2, Columns, Rows } from "lucide-react";
+import {
+  RotateCcw,
+  FileJson,
+  Loader2,
+  Maximize2,
+  Columns,
+  Rows,
+} from "lucide-react";
 import { generateFullPDF } from "@/lib/exportUtils";
 import { Button } from "@/components/ui/Button";
 
@@ -42,9 +49,9 @@ export const LeftSidebar: React.FC = () => {
       {/* Branding */}
       <div className="flex items-center gap-3 mb-10 shrink-0">
         <Image
-          src="/MONOGRAMA.png"
-          height={40}
-          width={40}
+          src="/ISOTIPO.png"
+          height={30}
+          width={30}
           alt="Growth Rockstar Logo"
           className="object-contain"
         />
@@ -105,9 +112,9 @@ export const LeftSidebar: React.FC = () => {
             <Maximize2 className="w-5 h-5" />
             <span className="font-medium text-sm">Ampliar Vista</span>
           </button>
-          
+
           <div className="flex gap-2">
-             <button
+            <button
               onClick={() => {
                 setGridColumns(1);
                 setFocusedSectionId(null); // Switch to grid view usually implies leaving focused mode
@@ -116,14 +123,14 @@ export const LeftSidebar: React.FC = () => {
                 "flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border text-xs font-medium transition-all",
                 meta.grid_columns === 1
                   ? "bg-[#010101]/5 text-[#010101] border-[#010101]"
-                  : "bg-white text-[#010101]/60 border-[#010101]/10 hover:border-[#010101]/30"
+                  : "bg-white text-[#010101]/60 border-[#010101]/10 hover:border-[#010101]/30",
               )}
               title="1 Columna"
-             >
-                <Rows className="w-4 h-4" />
-                <span>1 Col</span>
-             </button>
-             <button
+            >
+              <Rows className="w-4 h-4" />
+              <span>1 Col</span>
+            </button>
+            <button
               onClick={() => {
                 setGridColumns(2);
                 setFocusedSectionId(null);
@@ -132,13 +139,13 @@ export const LeftSidebar: React.FC = () => {
                 "flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border text-xs font-medium transition-all",
                 meta.grid_columns === 2
                   ? "bg-[#010101]/5 text-[#010101] border-[#010101]"
-                  : "bg-white text-[#010101]/60 border-[#010101]/10 hover:border-[#010101]/30"
+                  : "bg-white text-[#010101]/60 border-[#010101]/10 hover:border-[#010101]/30",
               )}
               title="2 Columnas"
-             >
-                <Columns className="w-4 h-4" />
-                <span>2 Cols</span>
-             </button>
+            >
+              <Columns className="w-4 h-4" />
+              <span>2 Cols</span>
+            </button>
           </div>
         </div>
 
@@ -210,27 +217,27 @@ export const LeftSidebar: React.FC = () => {
 
             {showQualityOptions && (
               <div className="absolute bottom-full left-0 w-full bg-white border border-[#010101]/10 rounded-lg shadow-xl mb-2 overflow-hidden z-20">
-                 <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-[#010101]/40 font-bold bg-[#f9f9f9] border-b border-[#010101]/5">
-                    Calidad
-                 </div>
-                 <button
-                    onClick={() => handlePDFExport(1)}
-                    className="w-full text-left px-4 py-2 text-sm text-[#010101] hover:bg-[#f2f2f2] transition-colors"
-                 >
-                    Baja (Rápida)
-                 </button>
-                 <button
-                    onClick={() => handlePDFExport(2)}
-                    className="w-full text-left px-4 py-2 text-sm text-[#010101] hover:bg-[#f2f2f2] transition-colors"
-                 >
-                    Media (Estándar)
-                 </button>
-                 <button
-                    onClick={() => handlePDFExport(3)}
-                    className="w-full text-left px-4 py-2 text-sm font-bold text-[#010101] hover:bg-[#f2f2f2] transition-colors"
-                 >
-                    Alta (HD)
-                 </button>
+                <div className="px-3 py-2 text-[10px] uppercase tracking-widest text-[#010101]/40 font-bold bg-[#f9f9f9] border-b border-[#010101]/5">
+                  Calidad
+                </div>
+                <button
+                  onClick={() => handlePDFExport(1)}
+                  className="w-full text-left px-4 py-2 text-sm text-[#010101] hover:bg-[#f2f2f2] transition-colors"
+                >
+                  Baja (Rápida)
+                </button>
+                <button
+                  onClick={() => handlePDFExport(2)}
+                  className="w-full text-left px-4 py-2 text-sm text-[#010101] hover:bg-[#f2f2f2] transition-colors"
+                >
+                  Media (Estándar)
+                </button>
+                <button
+                  onClick={() => handlePDFExport(3)}
+                  className="w-full text-left px-4 py-2 text-sm font-bold text-[#010101] hover:bg-[#f2f2f2] transition-colors"
+                >
+                  Alta (HD)
+                </button>
               </div>
             )}
           </div>
