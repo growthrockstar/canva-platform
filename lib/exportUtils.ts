@@ -34,14 +34,15 @@ export const generateSectionImage = async (sectionId: string, sectionTitle: stri
   if (!element) return;
 
   try {
+    const rect = element.getBoundingClientRect();
     const canvas = await html2canvas(element, {
       scale: 2, // Retain high quality
       backgroundColor: '#f2f2f2',
       useCORS: true,
       logging: false,
-      width: element.scrollWidth,
+      width: rect.width,
       height: element.scrollHeight,
-      windowWidth: element.scrollWidth,
+      windowWidth: rect.width,
       windowHeight: element.scrollHeight,
       onclone: (clonedDoc) => {
         // Optional: ensure cloned element has visible overflow?
@@ -49,7 +50,41 @@ export const generateSectionImage = async (sectionId: string, sectionTitle: stri
         if (clonedEl) {
           clonedEl.style.overflow = 'visible';
           clonedEl.style.height = 'auto'; // Force auto height
+          // Ensure it doesn't try to expand
+          clonedEl.style.width = `${rect.width}px`;
+          clonedEl.style.maxWidth = '100%';
         }
+
+        // --- FIX: Handle Iframes (Maps, Embeds) for Section Image ---
+        const iframes = clonedDoc.querySelectorAll('iframe');
+        iframes.forEach((iframe) => {
+          const iframeRect = iframe.getBoundingClientRect();
+          const placeholder = clonedDoc.createElement('div');
+
+          placeholder.style.width = iframe.style.width || `${iframeRect.width}px` || '100%';
+          placeholder.style.height = iframe.style.height || `${iframeRect.height}px` || '300px';
+          placeholder.style.backgroundColor = '#f9f9f9'; // Lighter for PDF
+          placeholder.style.border = '1px dashed #ccc';
+          placeholder.style.display = 'flex';
+          placeholder.style.flexDirection = 'column';
+          placeholder.style.alignItems = 'center';
+          placeholder.style.justifyContent = 'center';
+          placeholder.style.color = '#999';
+          placeholder.style.padding = '10px';
+
+          const src = iframe.getAttribute('src') || '';
+          let text = 'Embed Externo';
+          if (src.includes('google.com/maps')) text = 'Mapa';
+
+          placeholder.innerHTML = `
+             <div style="font-weight: bold; font-family: sans-serif; font-size: 12px;">[${text}]</div>
+             <div style="font-size: 10px;">${src}</div>
+           `;
+
+          if (iframe.parentNode) {
+            iframe.parentNode.replaceChild(placeholder, iframe);
+          }
+        });
       }
     });
 
@@ -87,29 +122,65 @@ export const generateFullPDF = async (projectTitle: string, scale: number = 3) =
     return;
   }
 
-  // Add a loading class or notification if possible?
-
   try {
+    const rect = element.getBoundingClientRect();
     const canvas = await html2canvas(element, {
       scale: scale, // Use provided scale
-      backgroundColor: '#1E1E20', // Matches app background usually
+      backgroundColor: '#f2f2f2', // Matches app background usually
       useCORS: true,
       logging: false,
-      width: element.scrollWidth,
+      width: rect.width,
       height: element.scrollHeight,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight
+      windowWidth: rect.width,
+      windowHeight: element.scrollHeight,
+      onclone: (clonedDoc) => {
+        const clonedEl = clonedDoc.getElementById('main-canvas-container');
+        if (clonedEl) {
+          clonedEl.style.width = `${rect.width}px`;
+        }
+
+        // --- FIX: Handle Iframes (Maps, Embeds) for Full PDF ---
+        const iframes = clonedDoc.querySelectorAll('iframe');
+        iframes.forEach((iframe) => {
+          const iframeRect = iframe.getBoundingClientRect();
+          const placeholder = clonedDoc.createElement('div');
+
+          placeholder.style.width = iframe.style.width || `${iframeRect.width}px` || '100%';
+          placeholder.style.height = iframe.style.height || `${iframeRect.height}px` || '300px';
+          placeholder.style.backgroundColor = '#f9f9f9'; // Lighter for PDF
+          placeholder.style.border = '1px dashed #ccc';
+          placeholder.style.display = 'flex';
+          placeholder.style.flexDirection = 'column';
+          placeholder.style.alignItems = 'center';
+          placeholder.style.justifyContent = 'center';
+          placeholder.style.color = '#999';
+          placeholder.style.padding = '10px';
+
+          const src = iframe.getAttribute('src') || '';
+          let text = 'Embed Externo';
+          if (src.includes('google.com/maps')) text = 'Mapa';
+
+          placeholder.innerHTML = `
+             <div style="font-weight: bold; font-family: sans-serif; font-size: 12px;">[${text}]</div>
+             <div style="font-size: 10px;">${src}</div>
+           `;
+
+          if (iframe.parentNode) {
+            iframe.parentNode.replaceChild(placeholder, iframe);
+          }
+        });
+
+        // --- FIX: Handle SVGs/Recharts Issues ---
+        const svgs = clonedDoc.querySelectorAll('svg');
+        svgs.forEach((svg) => {
+          svg.style.fontFamily = 'Arial, sans-serif'; // Force safe font
+        });
+      }
     });
 
     const imgData = canvas.toDataURL('image/png');
 
     // Calculate dimensions
-    // User wants ONE page with custom height.
-    // Let's base width on a standard A4 width (210mm) to keep text legible physically if needed, 
-    // or just proportional. 
-    // Actually, usually users want digital PDF.
-
-    // Let's use 210mm width as standard.
     const pdfWidth = 210;
     const imgProps = { width: canvas.width, height: canvas.height };
     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
@@ -129,11 +200,11 @@ export const generateFullPDF = async (projectTitle: string, scale: number = 3) =
     const file = new File([pdfBlob], filename, { type: 'application/pdf' });
 
     const shared = await shareFile(file, projectTitle, 'Mi Growth Rockstar Canvas Completo.');
-    if (!shared) {
+    if (!shared || !globalThis.matchMedia("(pointer: coarse)").matches) {
       pdf.save(filename);
     }
 
   } catch (error) {
     console.error("Error generating PDF", error);
   }
-}
+};

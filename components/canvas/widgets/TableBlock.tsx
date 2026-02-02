@@ -371,7 +371,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                 >
                   {isExporting ? (
                     <div
-                      className={`w-full h-full p-2 bg-transparent ${rowIndex === 0 ? "font-bold text-[var(--color-primary)]" : "text-white/80"}`}
+                      className={`w-full h-full p-2 bg-transparent ${rowIndex === 0 ? "font-bold text-[var(--color-primary)]" : ""}`}
                     >
                       {getCellDisplayValue(rowIndex, colIndex, cell)}
                     </div>
