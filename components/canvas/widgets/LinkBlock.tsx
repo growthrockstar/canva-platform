@@ -444,7 +444,7 @@ const GenericRenderer = ({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-4 p-4 hover:bg-white/5 transition-colors group/link"
+      className="flex items-center gap-4 p-4 bg-cta hover:bg-cta/80 transition-colors group/link"
     >
       <div className="w-12 h-12 rounded bg-gray-500/20 flex items-center justify-center text-gray-400">
         <ExternalLink className="w-6 h-6" />

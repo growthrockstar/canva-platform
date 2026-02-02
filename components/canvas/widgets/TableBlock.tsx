@@ -119,7 +119,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
     if (editingCell && (editingCell.r !== r || editingCell.c !== c)) {
       // Use editingValue if we are the active editor, otherwise fallback to rawData
       // Actually, rawData is only updated on commit. So editingValue IS the source of truth for the active cell.
-      const currentVal = editingValue; 
+      const currentVal = editingValue;
 
       // If we are editing a formula
       if (currentVal.startsWith("=")) {
@@ -172,7 +172,6 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
 
       // Calculate new range string
       const newRange = getRangeString(selectionStart, { r, c });
-
 
       // Replace the part of string from selectionRefIndex to end
       if (selectionRefIndex.current !== null) {
@@ -350,7 +349,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-2 w-8 bg-[#4b4f37] text-xs  border "></th>
+            <th className="p-2 w-8 bg-cta text-xs  border ">#</th>
             {rawData[0].map((_, i) => (
               <th key={i} className="p-2 bg-[#eeff8d] text-xs  border ">
                 {String.fromCharCode(65 + i)}
@@ -409,7 +408,10 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                             setEditingCell((prev) => {
                               // Only clear if we are still effectively "editing" the cell that blurred
                               // If prev has changed (e.g. focused another cell), don't clear.
-                              if (prev?.r === rowIndex && prev?.c === colIndex) {
+                              if (
+                                prev?.r === rowIndex &&
+                                prev?.c === colIndex
+                              ) {
                                 return null;
                               }
                               return prev;

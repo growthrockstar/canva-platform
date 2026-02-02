@@ -6,6 +6,7 @@ import { Canvas } from "@/components/Canvas";
 import { useCanvasStore } from "@/lib/store/useCanvasStore";
 import Tour from "@/components/Tour";
 import { LeftSidebar } from "@/components/LeftSidebar";
+import { MobileToolbar } from "@/components/MobileToolbar";
 
 export default function CanvasPage() {
   const { isAuthenticated, isAuthChecking, loadCanvas } = useCanvasStore();
@@ -48,9 +49,11 @@ export default function CanvasPage() {
 
       <LeftSidebar />
 
-      <main className="flex-1 h-screen overflow-y-auto custom-scrollbar relative">
+      <main className="flex-1 h-screen overflow-y-auto custom-scrollbar relative pb-20 lg:pb-0">
         <Canvas />
       </main>
+      
+      <MobileToolbar />
     </div>
   );
 }
