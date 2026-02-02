@@ -538,7 +538,7 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({ widget, onUpdate }) => {
             <input
               type="text"
               placeholder="Paste URL here..."
-              className="flex-1 bg-background text-black border border-dashed rounded px-3 py-2 text-sm   placeholder-black/80 focus:outline-none focus:border-white/30"
+              className="flex-1 bg-background text-black border border-dashed rounded px-3 py-2 text-sm  border-black/50 placeholder-black/80 focus:outline-none focus:border-black"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               autoFocus
