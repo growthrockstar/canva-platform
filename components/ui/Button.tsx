@@ -25,6 +25,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "h-8 px-3 text-xs": size === "sm",
             "h-10 px-4 py-2": size === "md",
             "h-12 px-6 text-lg": size === "lg",
+            "h-6 px-2 text-[8px]": size === "sm" && variant === "outline",
           },
           className,
         )}

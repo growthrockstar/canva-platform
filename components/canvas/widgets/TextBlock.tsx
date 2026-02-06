@@ -204,15 +204,15 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
 
       if (h1Match) {
         flushList();
-        newHtml += `<h1 class="text-3xl font-bold mb-4 mt-2 border-b border-white/10 pb-2">${formatInline(h1Match[1])}</h1>`;
+        newHtml += `<h1 class="text-lg font-bold mb-1 mt-1 border-b border-white/10 ">${formatInline(h1Match[1])}</h1>`;
         handled = true;
       } else if (h2Match) {
         flushList();
-        newHtml += `<h2 class="text-2xl font-semibold mb-3 mt-2">${formatInline(h2Match[1])}</h2>`;
+        newHtml += `<h2 class="text-base font-semibold mb-1 mt-1">${formatInline(h2Match[1])}</h2>`;
         handled = true;
       } else if (h3Match) {
         flushList();
-        newHtml += `<h3 class="text-xl font-medium mb-2 mt-1">${formatInline(h3Match[1])}</h3>`;
+        newHtml += `<h3 class="text-sm font-medium">${formatInline(h3Match[1])}</h3>`;
         handled = true;
       } else if (bulletMatch) {
         isListItem = true;
@@ -263,7 +263,7 @@ export const TextBlock: React.FC<TextBlockProps> = ({ widget, onUpdate }) => {
       <div
         ref={contentRef}
         className={cn(
-          "min-h-[2em] p-2 outline-none  focus:ring-[var(--color-primary)] rounded border border-transparent focus:border-black  focus:border-dashed transition-colors text-lg",
+          "min-h-[2em] p-2 outline-none  focus:ring-[var(--color-primary)] rounded border border-transparent focus:border-black  focus:border-dashed transition-colors text-xs",
           "empty:before:content-[attr(data-placeholder)] empty:before:text-white/30",
           "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5", // Add styles for lists
         )}

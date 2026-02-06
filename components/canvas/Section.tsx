@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DndContext,
   pointerWithin,
@@ -34,6 +34,8 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
     isExporting,
     setIsExporting,
   } = useCanvasStore();
+
+  const [fiveSecondsPassed, setFiveSecondsPassed] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -79,21 +81,29 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
     }, 500);
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFiveSecondsPassed(true);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div
       id={section.id}
       className={cn(
-        "mb-12 print:mb-8  print:break-inside-avoid relative",
+        "print:mb-8 bg-gray-400/10 p-5 shadow print:break-inside-avoid relative",
         isExporting && " p-8 mb-0 ",
       )}
     >
       {/* Section Header */}
-      <div className="flex items-center justify-between  mb-6 border-b border-[var(--color-primary)]/30 pb-2">
+      <div className="flex items-center justify-between  mb-3 border-b border-[var(--color-primary)]/30 pb-2">
         <div className="flex flex-col font-title">
-          <h2 className="text-2xl font-bold text-[var(--color-primary)] flex items-center gap-3">
+          <h2 className="text-lg font-bold text-[var(--color-primary)] flex items-center gap-3">
             <span
               className={cn(
-                "text-black/90 text-3xl print:text-black/50",
+                "text-black/90 text-xl print:text-black/50",
                 isExporting && "text-[var(--color-primary)] opacity-50",
               )}
             >
@@ -161,12 +171,12 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
         >
           <div
             className={cn(
-              "space-y-4 min-h-[100px] font-sans border border-dashed border-white/5 rounded-lg p-4 bg-white/[0.02]",
+              "space-y-4 min-h-[20px] font-sans  ",
               isExporting && "border-none",
             )}
           >
             {section.widgets.length === 0 && !isExporting && (
-              <div className="text-center py-8 text-black/20 italic select-none">
+              <div className="text-center py-4 text-sm text-black/20 italic select-none">
                 Arrastra bloques o agrega contenido aquí
               </div>
             )}
@@ -188,7 +198,12 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
           ) : null}
         </DragOverlay>
       </DndContext>
-      <p className={cn("text-center text-xs", isExporting && "hidden")}>
+      <p
+        className={cn(
+          "text-center text-xs animate-pulse font-bold",
+          (isExporting || fiveSecondsPassed) && "hidden",
+        )}
+      >
         Selecciona una de estas opciones para agregar un bloque:
       </p>
       <div

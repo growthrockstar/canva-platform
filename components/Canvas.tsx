@@ -19,7 +19,7 @@ export const Canvas: React.FC = () => {
     fetchSections,
     focusedSectionId,
   } = useCanvasStore();
-  
+
   // Force 1 column on mobile via CSS usually, but let's check logic.
   // We can also check window width but hydration mismatch risk.
   // Best rely on CSS classes.
@@ -28,7 +28,7 @@ export const Canvas: React.FC = () => {
   // If cols=3 (desktop), it uses responsive. So mobile gets grid-cols-1.
   // If cols=2 (desktop), mobile gets grid-cols-1.
   // So "strictly 1 col on mobile" is already handled by Tailwind's mobile-first `grid-cols-1`.
-  
+
   const cols = meta.grid_columns || 1;
 
   React.useEffect(() => {
@@ -97,7 +97,7 @@ export const Canvas: React.FC = () => {
 
       <div
         className={cn(
-          "grid gap-8 pb-20", // Added padding bottom for scrolling
+          "grid gap-8 pb-10", // Added padding bottom for scrolling
           isExporting
             ? "grid-cols-1"
             : {

@@ -349,9 +349,9 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th className="p-2 w-8 bg-cta text-xs  border ">#</th>
+            <th className="p-1 w-8 bg-cta text-xs  border ">#</th>
             {rawData[0].map((_, i) => (
-              <th key={i} className="p-2 bg-[#eeff8d] text-xs  border ">
+              <th key={i} className="p-1 bg-[#eeff8d] text-xs  border ">
                 {String.fromCharCode(65 + i)}
               </th>
             ))}
@@ -359,14 +359,14 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
         </thead>
         <tbody>
           {rawData.map((row, rowIndex) => (
-            <tr key={rowIndex} className="group/row">
-              <td className="p-2 bg-[#eeff8d] text-xs border text-center">
+            <tr key={rowIndex} className="p-1 w-8 text-xs">
+              <td className="bg-[#eeff8d] text-xs border text-center">
                 {rowIndex + 1}
               </td>
               {row.map((cell, colIndex) => (
                 <td
                   key={colIndex}
-                  className="border border p-0 relative group/cell min-w-[100px]"
+                  className="border relative group/cell min-w-[100px]"
                 >
                   {isExporting ? (
                     <div
@@ -419,7 +419,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                           }
                         }, 150);
                       }}
-                      className={`w-full h-full p-2 bg-transparent  focus:outline-none 
+                      className={`w-full h-full px-2 bg-transparent text-sm focus:outline-none 
 
                                         ${rowIndex === 0 ? "font-bold text-[var(--color-primary)]" : ""}
                                         focus:bg-white/10 transition-colors
@@ -444,7 +444,7 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
                 </td>
               ))}
               {!isExporting && (
-                <td className="p-2 w-10 border-none opacity-0 group-hover/row:opacity-100 transition-opacity">
+                <td className="p-2 w-10 border-none  z-50 opacity-0 group-hover/row:opacity-100 transition-opacity">
                   <Button
                     size="sm"
                     variant="ghost"
@@ -501,10 +501,10 @@ export const TableBlock: React.FC<TableBlockProps> = ({ widget, onUpdate }) => {
       {!isExporting && (
         <div className="flex gap-2 justify-end mt-2 mr-12">
           <Button variant="outline" size="sm" onClick={addRow}>
-            <Plus className="w-4 h-4 mr-2" /> Agregar Fila
+            <Plus className="w-2 h-2 mr-2" /> Agregar Fila
           </Button>
           <Button variant="outline" size="sm" onClick={addColumn}>
-            <Plus className="w-4 h-4 mr-2" /> Agregar Columna
+            <Plus className="w-2 h-2 mr-2" /> Agregar Columna
           </Button>
         </div>
       )}
