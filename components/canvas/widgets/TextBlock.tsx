@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import type { Widget } from "@/types/canvas";
-import { cn } from "@/lib/utils";
+import { cn } from "@/public/lib/utils";
 
 interface TextBlockProps {
   widget: Widget;

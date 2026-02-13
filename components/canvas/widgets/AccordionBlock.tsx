@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Widget } from "@/types/canvas";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 import { Button } from "@/components/ui/Button";
 import { WidgetRenderer } from "../WidgetRenderer";
 import {
@@ -11,7 +11,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableWidget } from "../SortableWidget";
-import { cn } from "@/lib/utils";
+import { cn } from "@/public/lib/utils";
 import { useDroppable } from "@dnd-kit/core";
 
 interface AccordionBlockProps {

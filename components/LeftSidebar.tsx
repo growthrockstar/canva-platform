@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
-import { cn } from "@/lib/utils";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
+import { cn } from "@/public/lib/utils";
 import {
   RotateCcw,
   FileJson,
@@ -14,7 +14,7 @@ import {
   Rows,
   LogOut,
 } from "lucide-react";
-import { generateFullPDF } from "@/lib/exportUtils";
+import { generateFullPDF } from "@/public/lib/exportUtils";
 import { Button } from "@/components/ui/Button";
 
 export const LeftSidebar: React.FC = () => {
@@ -63,7 +63,7 @@ export const LeftSidebar: React.FC = () => {
       {/* Branding */}
       <div className="flex items-center gap-3 mb-10 shrink-0">
         <Image
-          src="/ISOTIPO.png"
+          src="/IMAGOTIPO.png"
           height={30}
           width={30}
           alt="Growth Rockstar Logo"

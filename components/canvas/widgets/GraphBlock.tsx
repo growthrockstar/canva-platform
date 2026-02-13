@@ -20,9 +20,9 @@ import {
 } from "recharts";
 import { Settings } from "lucide-react";
 import type { Widget } from "@/types/canvas";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 import { Button } from "@/components/ui/Button";
-import { sheetEngine } from "@/lib/sheetEngine";
+import { sheetEngine } from "@/public/lib/sheetEngine";
 
 interface GraphBlockProps {
   widget: Widget;

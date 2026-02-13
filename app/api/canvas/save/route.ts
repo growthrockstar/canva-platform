@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { verifySession } from '@/lib/auth-utils';
-import { encrypt } from '@/lib/encryption';
+import { prisma } from '@/public/lib/prisma';
+import { verifySession } from '@/public/lib/auth-utils';
+import { encrypt } from '@/public/lib/encryption';
 
 export async function POST(req: Request) {
     try {
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
                     updatedAt: new Date(),
                 },
                 create: {
-                    id: canvasId, 
+                    id: canvasId,
                     title: title || 'Growth Rockstar Strategy',
                     data: encryptedData,
                     iv,
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
             // No ID provided. 
             // SMART LOGIC: Check if user already has a canvas. If so, update the latest one.
             // This prevents duplicate creation when frontend loses state (e.g. fresh browser) but user has data.
-            
+
             const existingCanvas = await prisma.canvas.findFirst({
                 where: { userId: userId },
                 orderBy: { updatedAt: 'desc' }

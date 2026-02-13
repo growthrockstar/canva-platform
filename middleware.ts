@@ -5,8 +5,8 @@ import { jwtVerify } from 'jose';
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'default-secret-change-me-in-prod');
 
 export async function middleware(request: NextRequest) {
-    // Only protect /canvas routes
-    if (request.nextUrl.pathname.startsWith('/canvas')) {
+    // Protect /canvas and /new routes
+    if (request.nextUrl.pathname.startsWith('/canvas') || request.nextUrl.pathname.startsWith('/new')) {
         const session = request.cookies.get('session')?.value;
 
         if (!session) {
@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
             await jwtVerify(session, JWT_SECRET, { algorithms: ['HS256'] });
             return NextResponse.next();
         } catch (error) {
-            // Invalid token
+            console.error('Session verification failed', error);
             return NextResponse.redirect(new URL('/login', request.url));
         }
     }
@@ -26,5 +26,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/canvas/:path*'],
+    matcher: ['/canvas/:path*', '/new/:path*'],
 };

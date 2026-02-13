@@ -20,7 +20,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import type { Widget } from "@/types/canvas";
-import { cn } from "@/lib/utils";
+import { cn } from "@/public/lib/utils";
 import { Button } from "@/components/ui/Button";
 
 interface LinkBlockProps {

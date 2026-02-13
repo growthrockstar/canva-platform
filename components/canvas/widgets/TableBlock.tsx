@@ -5,8 +5,8 @@ import { createPortal } from "react-dom";
 import { Plus, Trash2 } from "lucide-react";
 import type { Widget } from "@/types/canvas";
 import { Button } from "@/components/ui/Button";
-import { sheetEngine, type FunctionMetadata } from "@/lib/sheetEngine";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { sheetEngine, type FunctionMetadata } from "@/public/lib/sheetEngine";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 
 interface TableBlockProps {
   widget: Widget;

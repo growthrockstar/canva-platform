@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 
 export const AuthForms = ({
   mode = "login",

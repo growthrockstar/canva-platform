@@ -14,12 +14,12 @@ import {
 } from "@dnd-kit/sortable";
 import { Plus, CheckSquare, Square, Share2, Loader2 } from "lucide-react";
 import type { SyllabusSection } from "@/types/canvas";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 import { Button } from "../ui/Button";
 import { WidgetRenderer } from "./WidgetRenderer";
 import { SortableWidget } from "./SortableWidget";
-import { cn } from "@/lib/utils";
-import { generateSectionImage } from "@/lib/exportUtils";
+import { cn } from "@/public/lib/utils";
+import { generateSectionImage } from "@/public/lib/exportUtils";
 
 interface SectionProps {
   section: SyllabusSection;
@@ -115,7 +115,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
 
         {isGeneratingImage && (
           <img
-            src="/LOGOGROWTH.png"
+            src="/IMAGOTIPO.png"
             alt="Growth Rockstar"
             width={200}
             className="opacity-80 mb-4"

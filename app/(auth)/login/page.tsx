@@ -8,7 +8,7 @@ export default function LoginPage() {
 
       <div className="relative z-10 w-full flex flex-col items-center">
         <img
-          src="./LOGOGROWTH.png"
+          src="./IMAGOTIPO.png"
           alt="Growth Rockstar"
           className="h-12 mb-8 opacity-80"
         />

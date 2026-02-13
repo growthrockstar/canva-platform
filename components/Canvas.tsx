@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 import { Section } from "./canvas/Section";
-import { cn } from "@/lib/utils";
+import { cn } from "@/public/lib/utils";
 
 export const Canvas: React.FC = () => {
   const {
@@ -83,7 +83,7 @@ export const Canvas: React.FC = () => {
       {/* Export Header with Logo - Keep for PDF exports */}
       <div className={cn("hidden mb-8 text-center", isExporting && "block")}>
         <img
-          src="/LOGOGROWTH.png"
+          src="/IMAGOTIPO.png"
           alt="Growth Rockstar"
           className="h-16 mx-auto mb-4"
         />

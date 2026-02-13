@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Canvas } from "@/components/Canvas";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 import Tour from "@/components/Tour";
 import { LeftSidebar } from "@/components/LeftSidebar";
 import { MobileToolbar } from "@/components/MobileToolbar";
@@ -29,7 +29,7 @@ export default function CanvasPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
           <img
-            src="/LOGOGROWTH.png"
+            src="/IMAGOTIPO.png"
             alt="Loading..."
             className="h-12 opacity-50"
           />
@@ -52,7 +52,7 @@ export default function CanvasPage() {
       <main className="flex-1 h-screen overflow-y-auto custom-scrollbar relative pb-20 lg:pb-0">
         <Canvas />
       </main>
-      
+
       <MobileToolbar />
     </div>
   );

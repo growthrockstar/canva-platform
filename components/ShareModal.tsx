@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 import { Button } from "@/components/ui/Button";
 import { Share2, Loader2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { generateSectionImage } from "@/lib/exportUtils";
+import { cn } from "@/public/lib/utils";
+import { generateSectionImage } from "@/public/lib/exportUtils";
 
 interface ShareModalProps {
   isOpen: boolean;

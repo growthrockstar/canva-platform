@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { hashPassword, createSession } from '@/lib/auth-utils';
+import { prisma } from '@/public/lib/prisma';
+import { hashPassword, createSession } from '@/public/lib/auth-utils';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {

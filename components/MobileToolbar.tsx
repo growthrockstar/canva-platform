@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
-import { cn } from "@/lib/utils";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
+import { cn } from "@/public/lib/utils";
 import { Maximize2, FileJson, Loader2 } from "lucide-react";
-import { generateFullPDF } from "@/lib/exportUtils";
+import { generateFullPDF } from "@/public/lib/exportUtils";
 import { Button } from "@/components/ui/Button";
 
 export const MobileToolbar: React.FC = () => {

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
-import { useCanvasStore } from "@/lib/store/useCanvasStore";
+import { useCanvasStore } from "@/public/lib/store/useCanvasStore";
 
 const Tour: React.FC = () => {
   const { runTour, setRunTour } = useCanvasStore();
