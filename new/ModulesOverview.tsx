@@ -459,7 +459,6 @@ export const ModulesOverview = () => {
                   );
                 })}
               </div>
-
             </div>
           </div>
         </main>
