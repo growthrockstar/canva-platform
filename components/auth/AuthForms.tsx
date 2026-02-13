@@ -45,8 +45,8 @@ export const AuthForms = ({
       // 2. Load User Data (This will set isAuthenticated=true on success)
       await loadCanvas();
 
-      // 3. Redirect to Canvas
-      router.push("/canvas");
+      // 3. Redirect to New
+      router.push("/new");
     } catch (err: any) {
       setError(err.message);
     } finally {

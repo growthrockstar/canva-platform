@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace("/canvas");
+      router.replace("/new");
     } else {
       router.replace("/login");
     }
