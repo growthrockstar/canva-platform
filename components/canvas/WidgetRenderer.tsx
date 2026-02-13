@@ -23,7 +23,7 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   widget,
   sectionId,
 }) => {
-  const { updateWidget, removeWidget } = useCanvasStore();
+  const { updateWidget, removeWidget, widgetsLocked } = useCanvasStore();
 
   const handleUpdate = (data: Partial<Widget>) => {
     updateWidget(sectionId, widget.id, data);
@@ -57,17 +57,19 @@ export const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   return (
     <div className="relative group/widget mb-4 last:mb-0">
       {renderContent()}
-      <div className="absolute -right-10 top-0 opacity-0 group-hover/widget:opacity-100 transition-opacity flex flex-col gap-1 print:hidden z-50">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-[#d5454e] hover:text-[#d5454e] hover:bg-[#d5454e]/10"
-          onClick={() => removeWidget(sectionId, widget.id)}
-          title="Eliminar widget"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-      </div>
+      {!widgetsLocked && (
+        <div className="absolute -right-10 top-0 opacity-0 group-hover/widget:opacity-100 transition-opacity flex flex-col gap-1 print:hidden z-50">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-[#d5454e] hover:text-[#d5454e] hover:bg-[#d5454e]/10"
+            onClick={() => removeWidget(sectionId, widget.id)}
+            title="Eliminar widget"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

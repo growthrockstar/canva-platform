@@ -4,11 +4,12 @@ const prisma = new PrismaClient()
 
 async function main() {
     const sections = [
-        { title: 'FUNDAMENTOS Y RETENCIÓN', orderIndex: 0 },
+        { title: 'RETENCIÓN', orderIndex: 0 },
         { title: 'ADQUISICIÓN', orderIndex: 1 },
-        { title: 'ACTIVACIÓN', orderIndex: 2 },
-        { title: 'REVENUE & MONETIZACIÓN', orderIndex: 3 },
-        { title: 'REFERRAL & LOOPS', orderIndex: 4 },
+        { title: 'MONETIZACIÓN', orderIndex: 2 },
+        { title: 'MODELO', orderIndex: 3 },
+        { title: 'JOURNEY CORE DEL PRODUCTO', orderIndex: 4 },
+        { title: 'MOAT / DEFENDIBILIDAD', orderIndex: 5 },
     ]
 
     console.log('Start seeding sections...')

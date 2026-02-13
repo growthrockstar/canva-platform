@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { v4 as uuidv4 } from 'uuid';
 import type { ProjectState, Widget, SyllabusSection, WidgetType } from '@/types/canvas';
+import { FLAGS } from '@/public/lib/flags';
 
 // Debounce helper
 const debounce = (fn: Function, ms: number) => {
@@ -53,6 +54,10 @@ interface CanvasStore extends ProjectState {
   // View State
   focusedSectionId: string | null;
   setFocusedSectionId: (id: string | null) => void;
+
+  // Widget Lock
+  widgetsLocked: boolean;
+  setWidgetsLocked: (locked: boolean) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>()(
@@ -440,6 +445,10 @@ export const useCanvasStore = create<CanvasStore>()(
 
     focusedSectionId: null,
     setFocusedSectionId: (id) => set({ focusedSectionId: id }),
+
+    // Widget Lock — when true, hides add/delete/move controls
+    widgetsLocked: FLAGS.WIDGETS_LOCKED,
+    setWidgetsLocked: (locked) => set({ widgetsLocked: locked }),
   }),
 
 );
