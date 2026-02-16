@@ -33,6 +33,7 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
     toggleSectionComplete,
     isExporting,
     setIsExporting,
+    widgetsLocked,
   } = useCanvasStore();
 
   const [fiveSecondsPassed, setFiveSecondsPassed] = useState(false);
@@ -198,63 +199,67 @@ export const Section: React.FC<SectionProps> = ({ section, index }) => {
           ) : null}
         </DragOverlay>
       </DndContext>
-      <p
-        className={cn(
-          "text-center text-xs animate-pulse font-bold",
-          (isExporting || fiveSecondsPassed) && "hidden",
-        )}
-      >
-        Selecciona una de estas opciones para agregar un bloque:
-      </p>
-      <div
-        className={cn(
-          " mt-4 flex flex-wrap gap-2 justify-center transition-opacity print:hidden",
-          isExporting && "hidden",
-        )}
-      >
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => addWidget(section.id, "text_block")}
-        >
-          <Plus className="w-4 h-4 mr-2" /> Texto
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => addWidget(section.id, "accordion")}
-        >
-          <Plus className="w-4 h-4 mr-2" /> Deslizable
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => addWidget(section.id, "table")}
-        >
-          <Plus className="w-4 h-4 mr-2" /> Tabla
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => addWidget(section.id, "image_base64")}
-        >
-          <Plus className="w-4 h-4 mr-2" /> Imagen
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => addWidget(section.id, "graph_plot")}
-        >
-          <Plus className="w-4 h-4 mr-2" /> Gráfico
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => addWidget(section.id, "link_block")}
-        >
-          <Plus className="w-4 h-4 mr-2" /> Enlace
-        </Button>
-      </div>
+      {!widgetsLocked && (
+        <>
+          <p
+            className={cn(
+              "text-center text-xs animate-pulse font-bold",
+              (isExporting || fiveSecondsPassed) && "hidden",
+            )}
+          >
+            Selecciona una de estas opciones para agregar un bloque:
+          </p>
+          <div
+            className={cn(
+              " mt-4 flex flex-wrap gap-2 justify-center transition-opacity print:hidden",
+              isExporting && "hidden",
+            )}
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => addWidget(section.id, "text_block")}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Texto
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => addWidget(section.id, "accordion")}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Deslizable
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => addWidget(section.id, "table")}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Tabla
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => addWidget(section.id, "image_base64")}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Imagen
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => addWidget(section.id, "graph_plot")}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Gráfico
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => addWidget(section.id, "link_block")}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Enlace
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
