@@ -342,10 +342,10 @@ export const ModulesOverview = () => {
                 className="h-6 px-2 text-[10px] hover:bg-(--color-cta) hover:no-underline"
                 onClick={() => handleCapture("classic")}
                 disabled={isCapturingAll || isSharingWhatsApp}
-                title="Descargar imagen clásica"
+                title="Descargar imagen PNG"
               >
                 <Camera className="w-3 h-3 mr-1" />
-                Clásica
+                PNG
               </Button>
 
               <Button
